@@ -1,0 +1,168 @@
+# JAVA接口
+
+## 接口（interface）
+
+主要用来描述类具有什么功能，而并不给出每个功能的具体实现（类似于一种约定好的协议）。
+
+一个类可以实现（implement）一个或多个接口。
+
+### 概念
+
+- 接口不是类，使用interface关键字，而是对类的一组需求描述，这些类要遵从接口描述的统一格式进行定义。
+
+- 接口中所有方法自动（强制）属于public abstract，所以在接口中声明方法时，不必提供关键字public。但是在实现接口时，必须显示写出public（否则编译器默认为是包可见性，可见性小于接口中的方法，这是不允许的）
+
+- 接口中可以定义[常量](./附录E-JAVA常用关键字.md)。
+
+- 接口中不能含有实例域。接口中"实例域"必须被初始化，且默认是 `public static final` 修饰的。
+
+```java
+package EmployeeManage;
+
+public interface Test {
+
+    String name = null;
+
+}
+```
+
+经过 `javap EmployeeManage.Test` 反编译之后代码
+
+```java
+PS C:\Users\xpf14\AppData\LocalRepository\removing\dfei\src\main\java> javap EmployeeManage.Test
+Compiled from "Test.java"
+public interface EmployeeManage.Test {
+  public static final java.lang.String name;
+  static {};
+}
+```
+
+- JAVA SE 8之后，接口中可以提供简单方法（[默认方法](#默认方法)，由default关键字标识，强制要求提供方法体；[静态方法](#静态方法)）
+
+### 特性
+
+- 接口不是类，不能使用new运算符实例化一个接口；但是可以声明接口的变量，此变量必须引用实现该接口的类对象
+- 可以使用[`instanceof`](./附录E-JAVA常用关键字.md) 检查一个对象是否实现了某个特定的接口（也可以检查某个对象是否属于某个特定类）
+- 接口可以被扩展（extends），可以扩展多个接口。
+- 接口中不能含有实例域或[静态方法（`javaSE8`之前）](#静态方法)，但却可以包含常量。接口中的域被自动设为 `public static final` ，方法自动设为 public
+- 类可以实现多个接口（implements）,接口之间用逗号隔开
+- 接口中的内部类默认为`public static` 
+
+### 接口与抽象类
+
+抽象类属于类，类是单继承机制；而接口不属于类，接口是多继承机制。
+
+### 静态方法
+
+在JAVA SE 8中，允许在接口中增加静态方法；在这之前，由于这是不被允许的，通常将静态方法放在伴随类中，在标准库中有很多例子：`Collection/Collections` 或 `Path/Paths`，这些都是接口+伴随类的形式。
+
+接口中的静态方法必须具有方法体。
+
+接口中的静态方法只能调用接口的静态方法和域（因为域自动是`public static final`）
+
+### 默认方法
+
+使用default关键字标识，方法必须具有方法体。默认方法可以不被实现类实现。
+
+默认方法可以调用该接口中的任何方法（包括静态方法），任何域（接口中的域都是public static final的）
+
+#### 接口演化
+
+默认方法的一个重要用法，提供兼容性。
+
+#### 解决默认方法冲突
+
+冲突产生的前提是，父级们都具有方法签名相同的方法（其中至少有一个父级的方法不是默认方法（不然都不用实现了，就不会有冲突））。
+
+- 超类优先：如果一个类继承了一个父类，又实现了一个接口，如果父类中提供了一个具体方法，那么接口中同名而且有相同参数类型的默认方法会被忽略。
+- 接口冲突：如果一个类实现了两个接口，一个接口提供了一个默认方法，另一个接口提供了一个同名且参数类型相同的（不管是不是默认方法）的方法，那么子类都必须覆盖这个方法来解决冲突。
+
+**千万不要让一个默认方法重新定义Object类中的某个方法**，由于超类优先规则，该默认方法优先级永远无法超越Object中的方法。
+
+### 应用示例
+
+#### [回调参数](#回调) 
+
+将接口作为回调对象参数传入方法中。由于实现该接口的类必定会实现接口中定义的规范方法，所以可以使用接口类型来定义变量，引用指向具体实现的类的对象。
+
+#### 标记接口
+
+用作一个标记，接口中没有任何东西。作用是能够使用`instanceof` ，例如`Cloneable` 接口。
+
+
+
+## 回调
+
+指出在某个特定事件发生时应该采取的动作。
+
+在其他语言中，可以通过传入一个函数名，在特定事件发生时，通过函数名调用该函数。
+
+在JAVA中，一般通过将要采取的动作封装在类中，将类的对象作为参数转递给事件，事件执行到特定位置，通过该对象调用封装好的方法。
+
+```java
+package timer;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.time.LocalDate;
+
+public class TimerTest {
+
+    public static void main(String[] args) {
+
+        ActionListener listener = new TimerPrint();
+
+        Timer timer = new Timer(10000, listener);
+        timer.start();
+
+        JOptionPane.showMessageDialog(null, "Quit Program?");
+        System.exit(0);
+    }
+
+}
+
+class TimerPrint implements ActionListener {
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        System.out.println("At this tone, the time is " + LocalDate.now());
+        Toolkit.getDefaultToolkit().beep();
+    }
+}
+```
+
+## 克隆
+
+`Cloneable` 接口，一个标记接口（接口中没有方法），如果自己实现克隆，需要实现该接口。
+
+### 浅拷贝
+
+类中的基本类型属性得到拷贝，对象属性得到一个与源类对象属性相同的引用。当对象属性是一个不可变类时，或者在整个生命周期中都不变的常量，那它是具备安全性的；否则缺乏安全性。
+
+Object类中的clone方法是浅拷贝，且是[protected](./02-JAVA基本语法.md)的。
+
+### 深拷贝
+
+在调用Object类的clone方法之后，对对象属性再调用该属性的clone方法（前提是该对象类型实现了`Cloneable`接口，即实现了自己的clone方法）
+
+```java
+public class Employee implements Cloneable {
+	public Employee clone() {
+		Employee cloned = (Employee) super.clone();
+		cloned.hireDay = (Date) hireDay.clone();
+		return cloned;
+	}
+}
+```
+
+JAVA SE 1.4之前，clone方法的返回值类型总是Object。
+
+#### 数组
+
+所有数组类型都有一个public的clone方法，返回原数组所有元素的副本。
+
+
+
+## [代理（proxy）](./附录L-JAVA代理.md) 

@@ -1,0 +1,401 @@
+# 泛型
+
+### 概念
+
+#### 泛型优点
+
+- 编写的代码可以被很多不同类型的对象所重用
+- 使用类型参数来指示元素的类型（JAVASE7之后，构造函数中可以省略泛型类型参数，菱形语法），给程序带来更好的可读性和安全性
+
+#### 类型变量
+
+##### 格式
+
+一般使用大写字母，且长度较短（一般一个字母表示）。一般使用E表示集合的元素类型，K和V分别表示表的关键字与值的类型。T（需要时还可以用临近的字母U和S）表示任意类型。
+
+**当类型变量为具体类型时（泛型集合），此时不支持协变。**即
+
+```java
+List<Apple> apples = new ArrayList<>();
+List<Fruit> fruits = apples; // 这是不被允许的
+```
+
+但是可以扩大左边的类型范围
+
+```
+List<? extends Fruits> fruits = apples;
+```
+
+
+
+##### 限定
+
+类或方法可以对类型变量的范围加以限定，使用extends关键字（不论是类或是接口都用这个关键字）`e.g.` 
+
+```java
+public static <T extends Comparable> T minmax(T... a) {
+
+}
+```
+
+这表示T类型是实现了Comparable接口的子类型。
+
+可以使用&来分隔限定类型，使用 `,` 来分隔类型变量。如果限定类型中有类也有接口，那么类只能有一个，且放在首位。
+
+##### 类上使用
+
+用`<>`括起来放在类名的后面，`<>`里可以有多个类型变量。在类上使用类型变量，可以用来指定**方法的返回值类型**、**方法的参数类型**、**域类型**、**局部变量类型**。
+
+```java
+class Pair<T> {
+    private T first;
+    private T second;
+
+    public Pair() {
+        this.first = null;
+        this.second = null;
+    }
+
+    public Pair(T first, T second) {
+        this.first = first;
+        this.second = second;
+    }
+
+    public T getFirst() {
+        return first;
+    }
+
+    public T getSecond() {
+        return second;
+    }
+
+    public void setFirst(T first) {
+        this.first = first;
+    }
+
+    public void setSecond(T second) {
+        this.second = second;
+    }
+}
+```
+
+##### 方法上使用
+
+类型变量可以用在方法上，成为泛型方法，该方法可以在普通类中，也可以在泛型类中。该类型参数可以表示**方法的返回值类型**、**参数类型**、**局部变量类型**。
+
+调用该方法时，可以在方法名前加上`<实际类型>`，在编译器能够推测出实际类型时可以省略（绝大部分都可以）。
+
+###### 单个类型变量
+
+```java
+class ArrayAlg {
+
+    public static <T> T getMiddle(T... a) {
+        T s = a[0];
+        return a[a.length / 2];
+    }
+}    
+```
+
+#### 泛型类型擦除
+
+虚拟机没有泛型类型对象，所有对象都属于普通类。
+
+##### 原始类型
+
+无论何时定义了一个泛型类型，都自动提供了一个相应的原始类型（raw type）。原始类型的名字就是删去类型参数后的泛型类型名。擦除（erased）类型变量，并替换为限定类型（无限定的变量用Object）。
+
+使用限定类型进行替换类型变量时，使用**第一个**限定的类型变量来替换，如果没有显示给定限定类型就用Object替换。`e.g.` 
+
+```java
+public class Interval<T extends Comparable & Serializable> implements Serializable {
+	private T lower;
+	private T upper;
+	...
+	public Interval(T first, T second) {
+		if (first.compareTo(second) <= 0) {
+			lower = first;
+			upper = second;
+		} else {
+			lower = second;
+			upper = first;
+		}
+	}
+}
+```
+
+泛型擦除后：
+
+```java
+public class Interval implements Serializable {
+	private Comparable lower;
+	private Comparable upper;
+	...
+	public Interval(Comparable first, Comparable second) {
+		if (first.compareTo(second) <= ) {
+			lower = first;
+			upper = second;
+		} else {
+			lower = second;
+			upper = first;
+		}
+	}
+}
+```
+
+在这里，如果切换限定类型的位置： `class Interval<T extends Serializable & Comparable>` ，那么，`Serializable` 类型会替换类型变量，编译器会在必要的时候向 `Comparable` 插入强制类型转换。所以，为了提供效率，应该**将标签（tagging）接口（即没有方法的接口）放在边界列表的末尾。** 
+
+##### 获取泛型方法返回值
+
+调用泛型方法时，擦除返回类型泛型，编译器会插入强制类型转换。`e.g.` 
+
+```java
+Pair<Employee> buddies = ...
+Employee buddy = buddies.getFirst();
+// Employee buddy = buddies.first; // 公用属性
+```
+
+编译器将这种方法翻译为两条虚拟机指令：
+
+- 对原始方法Pair.getFirst的调用
+- 将返回的Object类型强制转换为Employee类型
+
+##### 对泛型方法的调用
+
+###### 桥方法
+
+当类型擦除与多态发生冲突时，需要编译器在子类中生成一个桥方法。桥方法重写了父类泛型擦除后的泛型方法，并在方法中调用了子类的拥有具体类型的该方法，需要时在该方法中进行强制类型转换。`e.g.` 
+
+```java
+class DateInterval extends Pair<LocalDate> {
+
+    @Override
+    public void setSecond(LocalDate second) {
+        if (second.compareTo(this.getFirst()) > 0) {
+            super.setSecond(second);
+        }
+    }
+}
+```
+
+当类型擦除后，除了 `setSecond(LocalDate second)`，还有一个从Pair中继承过来的 `setSecond(Object second)` 方法。这里如果创建Pair的变量并引用`DateInterval`类的对象，调用`setSecond`方法，
+
+```java
+pair.setSeond(date);
+```
+
+为了解决类型擦除与多态的冲突，防止调用成Pair类中被类型擦除的Pair方法，此时编译器在`DateInterval`类中插入一个桥方法，他重写了Pair中被类型擦除后的 `setSecond(Object)`方法，并在其中调用了自身的 `setSecond(Date)` 方法，其中参数进行了强制类型转换。
+
+```java
+public void setSecond(Object second) {
+	this.setSecond((Date) second);
+}
+```
+
+### 约束与局限性
+
+1. 不能用基本类型实例化类型参数。`e.g.` 没有`Pair<double>` ，只有`Pair<Double>` 。这是因为类型擦除后，Pair类含有Object域，Object不能存储基本类型。
+
+2. 在运行时进行类型的查询或强制类型转换只能查出原始类型，对于类型变量无法查出。`e.g.` `instanceof、getClass()、Pair<String> p = (Pair<String> a)` 都会得到一个warning 
+
+3. 不能实例化参数化类型的数组。`e.g.` `Pair<String> table = new Pair<String>[10] // Error` 。类型擦除后，该数组类型是`Pair[]` ,当赋值给Object数组后，数组只能记住原始类型的信息（如果不是泛型数组，在存储时会抛出`ArrayStoreExceptionjin`异常），所以类型变量对应的类型不同时也能存储进去，只有在使用时才有可能会抛出错误。
+   但是可以声明参数化类型的数组变量，只是不能用new初始化。如果需要存储，可以声明[通配类型]()的数组，然后进行强转
+
+   ```java
+   Pair<String> table = (Pair<String>[]) new Pair<?>[10];
+   ```
+
+   但是这样结果将是不安全的，建议使用`ArrayList` 
+
+   ```java
+   ArrayList<Pair<String>>;
+   ```
+
+   这种约束对于可变参数依然适用，因为可变参数本质上是一个数组。
+
+4. 不能实例化类型变量，也不能适用类型变量构造数组。 `e.g.` `new T();  T.class; T[] mm = new T[2];...` 
+
+5. 不能在静态域或普通静态方法上引用类型变量。`e.g.`
+
+   ```java
+   public class Singleton<T> {
+   	private static T singleInstance; // Error
+   	public static T getSingleInstance() { // Error
+   		if (singleInstance == null) {
+   		
+   		}
+   		return singleInstance;
+   	}
+   }
+   ```
+
+6. 既不能抛出也不能捕获泛型类对象。实际上，泛型类扩展`Throwable`接口是不合法的。`e.g.`
+
+   ```
+   public class Problem<T> extends Exception {
+   
+   } // Error
+   ```
+
+   但是类型变量的限定类可以是`Throwable` ，以下适用方法是合法的
+
+   ```java
+   public static <T extends Throwable> void doWork(T t) throws T {
+   	try {
+   		
+   	} catch (Throwable realCause) {
+   		t.initCause(realCause);
+   		throw t;
+   	}
+   }
+   ```
+
+   不能捕获类型变量对象。
+
+7. 通过使用泛型类、类型擦除技术、`@SuppressWarning`注解，可以消除JAVA类型系统的部分基本限制，比如消除对受查异常的检查
+
+   ```java
+   public abstract class Block {
+   
+       public abstract void body() throws Exception;
+   
+       public Thread toThread() {
+           return new Thread() {
+               @Override
+               public void run() {
+                   try {
+                       body();
+                   } catch (Throwable t) {
+                       Block.throwAs(t);
+                   }
+               }
+           };
+       }
+       
+       @SuppressWarnings("unchecked")
+       public static <T extends Throwable> void throwAs(Throwable e) throws T {
+           throw (T) e;
+       } 
+   
+   }
+   ```
+
+8. 使用泛型时，想要更好的支持类型擦除的转换，就需要强行限制一个类或类型变量不能同时成为两个接口类型的子类，而这两个接口是同一接口的不同参数化。`e.g.` 
+
+   ```java
+   class Employee implements Comparable<Employee> {
+   	
+   }
+   class Manager extends Employee implements Comparable<Manager> {
+   
+   }
+   ```
+
+   Manager类会实现`Comparable<Employee>`和`Comparable<Manager>`，这是非法的。原因有可能是合成的[桥方法](#桥方法)产生冲突。
+
+
+
+### 泛型类的继承规则
+
+1. 无论类型变量S与T之间有什么关联关系，例如父子类，与之对应的泛型类，例如`Pair<S>`与`Pair<T>`都没有任何关系。
+2. 永远可以将参数化类型转换为一个原始类型。例如，`Pair<Employee>`是原始类型Pair的一个子类型。这在与遗留代码进行衔接时非常重要，但是转换之后如果要对数据进行某些操作还是可能会报`ClassCastException`异常，因为它转换时失去了对类型变量之间关系的判断。
+3. 泛型类可以扩展其他泛型类，前提是类型变量一致。
+
+### 通配符类型
+
+#### 概念
+
+##### 子类型限定
+
+通配符类型中，允许类型参数变化。`e.g.` 
+
+```java
+Pair<? extends Employee>
+```
+
+**表示任何泛型Pair类型，它的类型参数是Employee的子类，包括Employee自己。**并且没有破坏安全性。例如，调用setFirst方法会报错，因为编译器只知道需要某个Employee类型，但是不知道具体类型。但是getFirst方法返回值赋值给Employee就没问题。
+
+##### 超类型限定
+
+**`? super Manager` ，这个通配符限制为Manager的所有超类，包括Manager自己。**当作为方法参数的限定条件时，行为与子类型限定的行为恰好相反，因为Manager是下界，所以提供参数时，可以提供Manager及其子类，但是返回时，无法确定类型具体类型是什么
+
+###### 应用
+
+```java
+public static <T extends Comparable<T>> T min() {
+
+}
+```
+
+这相当于将 `T extends Comparable`写的更彻底一些，例如，T是String类型，String是`Comparable<String>` 的子类型。
+
+但是，当T是`LocalDate`时，会出现一个问题：`LocalDate`实现了`ChronoLocalDate`，而`ChronoLocalDate`扩展了`Comparable<ChronoLocalDate>`。因此，LocalDate实现的是`Comparable<ChronoLocalDate>`而不是`Comparable<LocalDate>`。此时可以写成
+
+```java
+public static <T extends Comparable<? super T>> T min(T[] a) {
+
+}
+```
+
+也可以作为一个函数式接口的参数类型，例如Collection接口有一个方法：
+
+```java
+default boolean removeIf(Predicate<? extends E> filter);
+```
+
+这个方法会删除所有满足给定谓词条件的元素，例如：
+
+```java
+ArrayList<Employee> staff = ...;
+Predicate<Object> oddHashCode = obj->obj.hashCode() % 2 != 0;
+staff.removeIf(oddHashCode);
+```
+
+[一篇文章带你了解Java泛型的super和extends](../assert/super&extends/一篇文章带你了解Java泛型的super和extends_java_脚本之家.html) 
+
+[一文读懂java泛型中的通配符](https://blog.51cto.com/u_15891990/5908724) 
+
+##### 无限定通配符
+
+`Pair<?>` ，它有以下方法：
+
+- `? getFirst()`
+- `void setFirst(?)`
+
+getFirst方法返回值只能赋值给Object。setFirst方法不能被调用，甚至不能用Object调用。而Pair原始类型可以用任意Object对象调用setObject方法。可以调用setFirst(null)。
+
+无限定通配符对于很多简单的操作非常有用。例如，下面这个方法将用来测试一个pair是否包含一个null引用，它不需要实际的类型：
+
+```java
+public static boolean hasNull(Pair<?> p) {
+	return p.getFirst() == null || p.getSecond() == null;
+}
+```
+
+通过将hasNull方法转换成泛型方法，可以避免使用通配符类型：
+
+```java
+public static <T> boolean hasNull(Pair<T> p)
+```
+
+但是，带有通配符的版本可读性更强。
+
+##### 通配符捕获
+
+通过一个中间泛型类来保存通配符类型
+
+```java
+    public static void swap(Pair<?> p) {
+        swapHelp(p);
+    }
+
+    public static <T> void swapHelp(Pair<T> p) {
+        T t = p.getFirst();
+        p.setFirst(p.getSecond());
+        p.setSecond(t);
+    }
+```
+
+只有在编译器能够确信通配符表达的是单个、确定的类型，才可以使用通配符捕获。像是`ArrayList<Pair<T>>`中的T永远不能捕获`ArrayList<Pair<?>>`中的通配符，因为数组列表可以保存两个`Pair<?>`，分别针对?的不同类型。
+
+### [反射与泛型](./附录G-JAVA反射.md) 

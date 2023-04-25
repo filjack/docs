@@ -1,0 +1,416 @@
+# JAVA异常
+
+## 异常
+
+### 异常类型
+
+异常都继承自`Throwable` 类，抛出异常只能是`Throwable`的子类的实例。
+
+
+
+#### Error
+
+描述了JAVA运行时系统的内部错误和资源耗尽错误。应用程序不应该抛出这种类型的对象。如果出现这种错误，除了通告给用户，并尽力使程序安全地终止之外，再也无能为力。
+
+#### Exception
+
+##### RuntimeException
+
+由程序错误导致。如果出现该类异常，一定是程序的问题。
+
+- 错误的类型转换
+
+- 数组访问越界
+
+- 访问null指针
+
+##### 其他异常
+
+程序本身没有问题，但由于像I/O错误这类问题导致的异常属于其他异常。
+
+- 试图在文件尾部后面读取数据
+
+- 试图打开一个不存在的文件
+
+- 试图根据给定的字符串查到Class对象，而这个字符串表示的类并不存在
+
+#### 非受查异常（unchecked）
+
+JAVA规范将派生于Error和`RuntimeException`类的所有异常称为非受查异常
+
+#### 受查异常（checked）
+
+其他异常。编译器将核查程序是否为所有的受查异常提供了异常处理器。
+
+#### 声明异常
+
+在方法首部声明所有可能抛出的异常 `e.g.:`
+
+```java
+public FileInputStream(String name) throws FileNotFoundException {
+    
+}
+```
+
+##### 什么时候必须要声明异常
+
+一个方法必须声明所有可能抛出地受查异常。
+
+1. 调用一个抛出受查异常的方法，例如上面的`FileInputStream`构造器
+2. 程序运行过程中发现错误（发现某处程序在特定情况下可能会出现一些异常情况），并且利用了throw语句抛出了一个受查异常
+3. 程序出现错误，例如，`a[-1] = 0`会抛出一个`ArrayIndexOutOfBoundException` 这样的非受查异常
+4. JAVA虚拟机和运行时库出现的内部错误
+5. 不需要声明任何JAVA的内部错误（即，从Error继承的错误），因为任何程序代码都具有抛出这些异常的潜能，而我们对其没有任何控制能力
+6. 不需要声明从RuntimeException继承的非受查异常，这些运行时错误完全在我们的控制中，我们应该尽可能地去修复这些错误而不是抛出异常。
+7. 子类重写了超类地方法，子类方法声明的异常必须是超类方法声明的异常或其派生异常或是不抛异常。
+8. 如果超类方法没有抛出任何受查异常，子类方法也不能抛出任何受查异常
+9. 方法中实际抛出的异常可能是声明的异常的派生类。
+
+#### 自定义异常类
+
+1. 自定义的异常类要继承Exception或者它的子类
+2. 构造器方法通常包含两个，一个默认无参构造器，一个是带有详细描述信息的构造器（超类Throwable的toString方法会打印这些信息）
+
+```java
+class FileFormatException extends IOException {
+	public FileFormatException() {}
+	public FileFormatException(String message) {
+		super(message);
+	}
+}
+```
+
+
+
+### 处理方法
+
+如果某个异常发生的时候没有在任何地方进行捕获，那么程序就会终止执行，并在控制台上打印出异常信息，包括异常的类型和堆栈的内容。
+
+#### 简单处理方法
+
+##### try...catch...捕获
+
+如果在try语句块中的任何代码处抛出了一个在catch子句中说明的异常类。
+
+- 程序将跳过try语句块剩余代码
+- 程序将执行catch子句中的处理器代码
+
+如果在try语句块中的代码中没有抛出任何异常，那么程序跳过catch子句。
+
+如果try语句块中任何代码抛出了一个在catch子句没有声明的异常，那么这个方法会立刻退出。
+
+一般选择捕获能够处理的异常，抛出处理不了的受查异常。
+
+##### 捕获多个异常
+
+catch子句可以对多个异常进行捕获，且能够合并对异常处理方式一致的异常。
+
+```java
+try {
+ 
+} catch (FileNotFoundException | UnknowHostException e) {
+	option1
+} catch (IOException e) {
+	option2
+}
+```
+
+只有当捕获的异常类型之间不存在子父类关系时才需要这种特性。此时，**异常变量e隐式为final变量**。
+
+##### 重新抛出异常
+
+在catch子句中可以重新抛出异常，这么做通常是为了改变异常的类型，对已经捕获的异常进行包装。`e.g.:` 
+
+```java
+try {
+
+} catch (SQLException e) {
+	throw new ServletException("database error:" + e.getMessage());
+}
+```
+
+但是不建议这样重新抛出异常，因为这样会丢失异常链信息，可以使用以下方式：
+
+```java
+try {
+
+} catch (SQLException e) {
+	Throwable se = new ServletException("database error");
+	se.initCause(e);
+	throw se;
+}
+```
+
+如果在一个方法中发生了一个受查异常，但是不允许抛出它，我们可以捕获它，将它包装成一个运行时异常并抛出。
+
+也可以在catch子句中对异常做记录，然后重新抛出该异常，什么都不做改变。`e.g.：` 打印异常日志。
+
+##### finally子句
+
+通常用它来处理try语句块中使用的本地资源，进行资源的回收。因为不论try语句块中是否有异常发生，都会执行finally子句。
+
+try语句可以只有finally子句而没有catch子句，这样无论try语句块中是否有异常，finally子句都会执行，有异常，该异常将被重新抛出
+
+###### 解耦合try/catch和try/finally 
+
+`e.g.:` 
+
+```java
+InputStream in = ...;
+try {
+	try {
+	
+	} finally {
+		in.close();
+	}
+} catch (IOException e) {
+
+}
+```
+
+内层try语句块只有一个职责，就是确保输入流关闭；外层try语句块职责是确保报告出现的异常（也可以报告finally子句中出现的异常）
+
+###### 包含return语句的finally语句
+
+当finally包含return时，由于finally语句会在try之后执行，如果try语句中也有return，那么finally有可能会覆盖掉它（前提是try语句正常执行完return）。
+
+```
+public static int f(int n) {
+	try {
+		int r = n * n;
+		return r;
+	} finally {
+		if (n == 2) {
+			return 0;
+		}
+	}
+}
+```
+
+##### 带资源的try语句
+
+当资源属于实现了`AutoCloseable`接口（该接口有一个close方法）的类，JAVASE 7提供了 `try-with-resources`  结构。
+
+```
+try (Resource res = ..) {}
+```
+
+当try块退出时（不论是正常退出，还是异常退出）会自动调用`res.close()`方法
+
+可以指定多个资源，用 `;`号隔开
+
+```java
+try (Scanner in = new Scanner(new FileInputStream("/usr/share/dict/words"), "UTF-8");
+	PrintWriter out = new PrintWriter("out.txt")
+) {
+	while (in.hasNext()) {
+		out.println(in.next().toUpperCase());
+	}
+}
+```
+
+使用带资源的try语句，可以避免使用finally关闭资源时，对关闭动作抛出异常的繁琐处理。
+
+#### 分析异常堆栈
+
+堆栈轨迹（stack trace）是一个方法调用过程的列表，包含了程序执行过程中方法调用的特定位置。
+
+##### `Throwable`的`printStackTrace`方法
+
+该方法可以访问堆栈轨迹的文本描述信息
+
+##### `getStackTrace`
+
+该方法得到一个`StackTraceElement`对象数组，`StackTraceElement`类中有能够获得文件名和当前执行的代码行号的方法；有能够获得类名和方法名的方法；`toString` 方法能够产生一个格式化的字符串，包含所获得的信息。`e.g.:` 
+
+```java
+Throwable t = new Throwable();
+StackTraceElement[] frames = t.getStackTrace();
+for (StackTraceElement frame : frames) {
+	// 分析异常
+}
+```
+
+##### `Thread.getAllStackTrace()`
+
+该静态方法可以产生所有线程的堆栈轨迹。`e.g.: ` 
+
+```
+Map<Thread, StackTraceElement[]> map = Thread.getAllStackTrace();
+for (Thread t : map.keySet()) {
+	StackTraceElement[] frames = map.get(t);
+	// 分析异常
+}
+```
+
+### 使用异常的技巧
+
+- 只在异常情况下使用异常，不要用异常去处理其他操作，例如：不要用异常去代替简单的测试。
+- 将正常处理与错误处理分开，不要过分细化异常，这样每一行操作都放在一个try...catch块中，将会使代码量急剧上升。尽量将一个完整的任务放在一个try...catch块中。
+- 要利用异常的层次结构，声明更加符合当前情况的异常，必要时可以[自定义异常](#自定义异常类) ，需要将捕获的异常转换为另一个更加适当的异常时不要犹豫。
+- 不要压制异常，要尽可能的处理异常
+- 在检测错误时，需要抛出异常时要尽可能早的抛出异常，避免引起后面一连串错误。
+- 在捕获异常时，尽量只捕获能处理的，将不能处理的异常抛出去。
+
+## 断言
+
+### 概念
+
+断言机制就像是一种高级的异常检测使用方法，可以开启或者关闭。在开启时，就像是在代码中插入了检测语句，关闭时，这些检测语句被自动移走（屏蔽）
+
+JAVA使用assert关键字
+
+#### assert语法
+
+对条件进行检测，如果结果为false，则抛出一个`AssertError`异常。
+
+- assert 条件;
+
+  ```java
+  assert x>=0;
+  ```
+
+  
+
+- assert 条件:表达式;
+  表达式将被传入`AssertError`异常的构造器中，并转换成一个消息字符串。`AssertError`异常并不存储表达式的值，所以在以后也不可能得到该表达式值。
+
+  ```java
+  // 将x的实际值传入AssertError
+  assert x>=0:x
+  ```
+
+
+#### 启用和禁用
+
+默认情况下，断言被禁用。在启用或禁用断言时不必重新编译程序。启用或禁用断言是[类加载器（class loader）]()的功能。当断言被禁用时，类加载器将跳过断言代码，并不会降低程序运行速度。
+
+##### 启用
+
+在运行程序时用 `-enableassertions/-ea` 启用
+
+```
+java -enableassertions MyApp
+```
+
+在某个类或整个包中使用断言
+
+```
+java -ea:MyClass -ea:com.mycompany.mylib... MyApp
+```
+
+这条命令将开启MyClass类以及在com.mycompany.mylib包和它的子包中的所有类的断言。选项 -ea将开启默认包中的所有类的断言。
+
+##### 禁用
+
+使用 -disableassertions/-da 禁用某个特定类和包的断言。
+
+##### 系统类
+
+对于没有类加载器的系统类而言，不能使用-ea和-da来进行开关，要使用-enablesystemassertions/-esa来进行控制
+
+### 使用断言
+
+- 断言失败是致命的，不可恢复的错误
+- 断言检查只用于开发和测试阶段
+
+## 日志
+
+### 基本日志
+
+#### 全局日志记录器（global logger）
+
+```java
+Logger.getGlobal().info("File->System");
+```
+
+如果在上述方法前调用
+
+```java
+Logger.getGlobal().setLevel(Level.OFF);
+```
+
+将会取消所有日志。
+
+### 高级日志
+
+在一个专业的应用程序中，不要将所有的日志都记录到一个全局记录器中，而是可以自定义日志记录器。
+
+```java
+private static final Logger myLogger = Logger.getLogger("com.mycompany.myapp");
+```
+
+用静态变量声明并引用一个日志记录器是为了防止GC回收掉没有被任何变量引用的日志记录器。
+
+#### 日志记录器的层次结构
+
+日志记录器的父与子之间将共享某些属性
+
+##### 日志级别
+
+子记录器将会继承父记录器的日志级别
+
+- SEVERE（最高级别）
+- WARNING
+- INFO
+- CONFIG
+- FINE
+- FINER
+- FINEST（最低级别）
+
+默认情况下，只记录SERVERE、WARNING、INFO这三个级别。可以设置其他级别（需要修改日志处理器的配置，不然不会处理），当设置了级别之后，该级别与比该级别更高的级别的日志将会被记录。
+
+### 日志管理器配置
+
+默认日志配置将级别等于或高于INFO的消息记录到控制台。
+
+##### 编辑配置文件
+
+默认情况下，配置文件位于 `jre/lib/logging.properties` 中。
+
+要想使用另一个配置文件，需要将 `java.util.logging.config.file`特性设置为配置文件的存储位置，使用如下命令：
+
+```
+java -Djava.util.logging.config.file=配置文件位置 启动类class文件
+```
+
+##### 自定义（建议）
+
+个性化设置，也就是得到自定义日志记录器之后，各种set方法进行配置
+
+### 本地化
+
+通过资源包（存储当前字符串与各个地区的对应字符的映射关系）来完成。
+
+### 处理器
+
+### 过滤器
+
+### 格式化器
+
+## 调试技巧
+
+1. 打印变量值
+
+2. 启用每个类的main方法进行该类的单元测试
+
+3. JUnit工具包
+
+4. 日志代理，它是一个子类的对象，可以截获方法调用，并进行日志记录，然后调用超类中的方法。
+
+   ```java
+       public static void main(String[] args) throws IOException {
+           Random random = new Random() {
+               @Override
+               public double nextDouble() {
+                   double result = super.nextDouble();
+                   log.info("niu bi");
+                   return result;
+               }
+           };
+       }
+   ```
+
+5. 利用Throwable的printStackTrace方法打印堆栈信息
+
+6. 未完待续

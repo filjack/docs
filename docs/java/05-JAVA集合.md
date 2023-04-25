@@ -1,0 +1,421 @@
+# 集合
+
+<img :src="$withBase('/img/05-extending-of-collection-frame.png')" class="align-center"/> 
+
+## 集合框架
+
+### [接口与实现分离](https://docs.oracle.com/en/java/javase/19/docs/api/index.html)
+
+### Collection
+
+集合类的基本接口。扩展了`Iterable`接口。
+
+#### List
+
+##### [`ArrayList`](./detail/ArrayList.md) 
+
+**数组**及**`ArrayList`**，当想要删除内部某个位置的元素时，效率很低，因为该位置以后的所有元素都要前移一个位置。*但是如果只是在末尾进行增删，由于数组结构，此时增删效率还是很高的。* 
+
+##### `LinkedList`
+
+这是一个双向链表。
+
+##### [Vector](./detail/Vector.md) 
+
+相较于`ArrayList`来说，该类的每个方法都是同步的。
+
+#### Set
+
+集合中不允许有重复元素。
+
+##### HashSet
+
+实现了基于散列表的集。该集的contains方法被重新定义，用来快速查看是否某个元素已经出现在集中，只是在某个桶中查找元素（计算出hashCode），不必查看集合所有元素。
+
+是一个无序的集合。
+
+###### `LinkedHashSet`（连接散列集）
+
+用来记录插入元素项的顺序，该顺序是访问顺序，按最近最少使用排列，即，每次调用get或put，受到影响的条目会从当前位置删除，并放到条目链表的尾部（注意，只有位于链表中的位置受影响，而位于散列表中的桶的位置不会受到影响）
+
+##### TreeSet（树集）
+
+是一个有序的集合，能够以任意顺序将元素插入到集合中。
+
+要使用树集，必须能够比较元素。要么这些元素实现Comparable及接口，要么构造集时提供一个Comparator
+
+```java
+new TreeSet<>(Comparator.comparing(Item::getDescription));
+```
+
+从JAVASE1.6开始，`TreeSet`类实现了`NavigableSet`接口，该接口增加了几个便于定位元素以及反向遍历的方法。
+
+##### `EnumSet`（枚举集）
+
+该集是一个枚举类型元素集的高效实现。由于枚举类型只有有限个实例，所有`EnumSet`内部用位序列实现。如果对应的值在集中，则相应的位置被置为1.
+
+该集没有公有构造器，可以使用静态工厂方法构造这个集：
+
+```java
+enum Weekday {MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY};
+EnumSet<Weekday> always = EnumSet.allOf(Weekday.class);
+EnumSet<Weekday> never = EnumSet.noneOf(Weekday.class);
+EnumSet<Weekday> workday = EnumSet.range(Weekday.MONDAY, Weekday.FRIDAY);
+EnumSet<Weekday> mwf = EnumSet.of(Weekday.MONDAY, Weekday.WEDNESDAY, Weekday.FRIDAY);
+```
+
+
+
+#### Queue
+
+##### Deque接口
+
+该接口在JAVA SE 1.6引入，双端队列，可以高效的在头部和尾部同时添加或删除元素，**概念上**不支持在队列中间添加元素。
+
+###### `ArrayDeque`
+
+###### LinkedList
+
+##### priority queue
+
+优先级队列，该队列中的元素可以按照任意的顺序插入，但是总能按照排序的顺序进行检索，然而，优先级队列并没有对所有的元素进行排序。
+
+使用堆（heap）这种数据结构，堆是一个可以自我调整的二叉树，对树执行添加和删除操作，可以让最小的元素移动到根，而不必花费时间对元素进行排序。
+
+类似于`TreeSet`，优先级队列既可以保存实现了Comparable接口的类对象，也可以保存在构造器中提供的Comparator对象。
+
+
+
+### 迭代器
+
+任何扩展了`Iterable`接口的类都可以使用[for each](./02-JAVA基本语法.md)进行迭代。
+
+迭代器对于并发修改的检测只针对结构性修改，如添加或删除；如果是值的改变则不被监控到。**当然，如果调用迭代器自己的remove方法，则不会有此风险。** 
+
+散列集的迭代器将依次访问所有的桶，但是由于散列将元素分散在表的各个位置上，所以访问它们的顺序几乎是随机的。
+
+### 访问
+
+#### 迭代器访问
+
+由链表支持的有序集合随机访问很慢，建议使用迭代器访问。
+
+#### 索引访问（随机访问）
+
+由数组支持的有序集合可以快速地随机访问，效率很高。
+
+#### `RandomAccess`
+
+JAVASE 1.4引入该接口，一个标记接口，用来判断一个特定的集合是否可以采用高效的随机访问
+
+```java
+if (c instanceof RandomAccess) {
+	use random access algorithm
+} else {
+	use sequential access algorithm
+}
+```
+
+## 映射（Map）
+
+### 概念
+
+映射存放了键/值对，根据已知的键的信息来查找相应的值的信息。映射的键是唯一的。
+
+### 实现
+
+#### [HashMap](./detail/HashMap.md) 
+
+对键进行散列，当不需要按照排列顺序访问键，建议采用散列映射，效率更高。
+
+#### `Collections.synchronizedMap(Map m)` 
+
+内部类`SynchronizedMap`对象：
+
+```java
+private static class SynchronizedMap<K,V>
+        implements Map<K,V>, Serializable {
+        private static final long serialVersionUID = 1978198479659022715L;
+
+        private final Map<K,V> m;     // Backing Map
+        final Object      mutex;        // Object on which to synchronize
+
+        SynchronizedMap(Map<K,V> m) {
+            this.m = Objects.requireNonNull(m);
+            mutex = this;
+        }
+
+        SynchronizedMap(Map<K,V> m, Object mutex) {
+            this.m = m;
+            this.mutex = mutex;
+        }
+
+        public int size() {
+            synchronized (mutex) {return m.size();}
+        }
+       }
+```
+
+该内部类维护了一个普通的Map对象，还有一个排斥锁mutex。
+
+##### WeakHashMap（弱散列映射）
+
+它的出现是为了处理一中特定的情况：当一个值，对应的键的最后一次引用已经消亡，不再有任何途径引用这个值的对象了，但是由于映射的引用对象是活动的，其中的所有桶也是活动的，就不能被GC回收。
+
+使用该数据结构，当对键的唯一引用来自散列条目时，这一数据结构将与垃圾回收器协同工作一起删除键值对。
+
+##### [`LinkedHashMap`（链接散列映射）](#LinkedHashSet（连接散列集）)
+
+##### `IdentityHashMap`（标识散列映射）
+
+该映射地键不是用`hashCode`函数计算，而是使用`System.identityHashCode`方法计算。该方法是`Object.hashCode`方法根据对象的内存地址来计算散列码时所使用的方式。
+
+在对两个对象进行比较时，`IdentityHashMap`类使用 == 号，而不是用equals。也就是说，不同的键对象，即使内容相同，也被视为是不同的对象。
+
+该类在实现对象遍历算法（如对象串行化）时非常有用，可以用来跟踪每个对象的遍历状况。
+
+#### TreeMap
+
+用键的整体顺序对元素进行排序，并将其组织成搜索树
+
+#### `EnumMap`（枚举映射）
+
+是一个键类型为枚举类型的映射。它可以直接且高效地用一个值数组实现。在使用时，需要在构造器中指定键类型：
+
+```java
+EnumMap<Weekday, Employee> personInCharge = new EnumMap<>(Weekday.class);
+```
+
+
+
+### 操作
+
+#### 更新
+
+防止`NullPointerException`
+
+- getOrDefault()
+
+  ```java
+  counts.put(word, counts.getOrDefault(word, 0) + 1);
+  ```
+
+- putIfAbsent(k, v)
+
+  ```java
+  // 当word不存在时，put进去一个word，并赋值0
+  counts.putIfAbsent(word, 0);
+  counts.put(word, counts.get(word) + 1);
+  ```
+
+- merge(k,v,F)
+
+  ```java
+  // 当word不存在时，赋值1，否则使用sum函数求原值与1的和
+  counts.merge(word, 1, Integer::sum);
+  ```
+
+  
+
+### 迭代
+
+#### for
+
+```java
+for(Map.Entry<String, Double> score: scores.entrySet()) {
+	String k = score.getKey();
+	Double v = score.getValue();
+}
+```
+
+
+
+#### forEach
+
+```java
+scores.forEach((k,v)->{
+	System.out.println("key=" + k + ", value=" + v);
+})
+```
+
+### 映射的视图
+
+映射的某一部分组成的Collection接口或其子接口的对象。
+
+#### 键集
+
+`Set<K> keySet();`
+
+1. 如果在键集视图上调用remove方法，会从该映射中删除该键值对。
+2. 不能在键集视图上新增元素。
+
+#### 值集
+
+`Collection<V> values();`
+
+#### 键值对集
+
+`Set<Map.Entry<K, V>> entrySet();`
+
+## 散列
+
+### 概念
+
+#### 散列表（hash table）
+
+为每个对象计算一个整数，称为散列码（hash code）。
+
+#### 散列码（hash code）
+
+由对象的实例域产生的一个整数。具有不同数据域的对象将产生不同的散列码。
+
+#### 桶（bucket）
+
+散列表用链表数组实现。每个列表被称为桶。
+
+#### 散列冲突（hash collision）
+
+当元素入桶时，桶中有其他元素，且该元素与桶内元素的状态不同，这时就是产生了冲突。
+
+#### 再散列（rehashed）
+
+如果散列表太满，就需要再散列，创建一个桶数更多的表，将所有元素插入到新表，然后丢弃原始的表。
+
+#### 装填因子（load factor）
+
+该值决定何时对散列表进行再散列。例如，如果装填因子为0.75（默认值），而表中超过75%的位置已经填入元素，这个表就会用**双倍**的桶数自动进行再散列。
+
+## 遗留的集合
+
+#### `HashTable`
+
+与HashMap作用一样，不过类中每个方法都是同步的（方法前加了`Synchronized`关键字）。如果对同步性或与遗留代码的兼容性没有任何要求，应该使用HashMap，如果需要并发访问，需要使用[`ConcurrentHashMap`]() 
+
+`HashTable`在put键值对时不允许键为null，此时会抛出异常；但是HashMap允许，因为对键做了处理。
+
+```java
+// HashMap
+static final int hash(Object key) {
+        int h;
+        return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+    }
+    
+public V put(K key, V value) {
+        return putVal(hash(key), key, value, false, true);
+    } 
+```
+
+
+
+##### 与HashMap比较
+
+- **实现方式不同**：`Hashtable` 继承了 Dictionary类，而 HashMap 继承的是 `AbstractMap` 类。
+
+  Dictionary 是 JDK 1.0 添加的，貌似没人用过这个，我也没用过。
+
+- **初始化容量不同**：HashMap 的初始容量为：16，`Hashtable` 初始容量为：11，两者的负载因子默认都是：0.75。
+
+- **扩容机制不同**：当现有容量大于总容量 * 负载因子时，HashMap 扩容规则为当前容量翻倍，`Hashtable` 扩容规则为当前容量翻倍 + 1。
+
+- **迭代器不同**：HashMap 中的 Iterator 迭代器是 fail-fast 的，而 `Hashtable` 的 Enumerator 不是 fail-fast 的。
+
+  所以，当其他线程改变了HashMap 的结构，如：增加、删除元素，将会抛出`ConcurrentModificationException` 异常，而 `Hashtable` 则不会。
+
+#### `Enumcration`（枚举）
+
+在遗留的集合中，使用该接口对集合内的元素进行迭代访问。
+
+##### `hasMoreElements`
+
+作用类似于Iterator接口的hasNext方法
+
+##### `nextElement`
+
+作用类似于Iterator接口的next方法
+
+#### Properties（属性映射）
+
+属性映射（property map）是一个类型非常特殊的映射结构，通常用于程序的特殊配置选项。
+
+- 键与值都是字符串
+- 映射表可以保存到一个文件中，或从文件中加载
+- 使用一个默认的辅助表
+
+#### Stack（栈）
+
+- push
+- pop
+- peek
+
+#### BitSet（位集）
+
+用于存放一个位序列。如果需要高效地存储位序列（例如，标志（true/false））就可以使用位集。
+
+```java
+BitSet bucketOfBits = new BitSet();
+// 如果第i位处于‘开的状态，就返回true，否则false
+bucketOfBits.get(i); 
+// 将第i位设置为‘开’状态
+bucketOfBits.set(i);
+// 将第i为设置为‘关’状态
+bucketOfBits.clear(i);
+```
+
+## 视图与包装器*
+
+#### 概念
+
+利用原类中的某些属性组成一个实现了Collection接口或Map接口的类的对象，这个类中的方法对原类进行操作，类似于这种对象的集合对象称为视图。视图反映的是对原数据的数据子集或操作子集的包装器。
+
+#### 轻量级集合包装器
+
+Collections类中有很多。这些构成的视图对象大多不能进行改变大小操作，只能读或写（修改视图内某个元素）。
+
+##### `Arrays.asList(T... paramters)`
+
+该方法将返回一个包装了普通JAVA数组的List包装器，返回的对象不是`ArrayList`。它是一个视图对象，带有访问底层数组的get和set方法。当对其调用任何改变数组大小的方法时都会抛出一个`UnsupportedOperationException`异常。
+
+##### `Collections.nCopies(int n, Object anObject)`
+
+调用该方法将返回一个实现了List接口的不可修改的对象，并给人一种包含n个元素，每个元素都是anObject的错觉，实际存储代价很小。
+
+#### 子范围
+
+根据集合的某个范围建立子视图，例如List的`subList`方法，可以将任何操作应用于子范围，并且能够自动地反映整个列表的情况（作用到原集合上）。
+
+#### 不可变视图
+
+在Collections中还有一些方法，用来产生集合的不可修改视图（这些方法以unmodifiable开头）。如果试图通过试图修改数据，那么将会抛出一个`UnsupportedOperationException`异常（包装器中已将更改器方法重新定义，直接抛异常，而不是将调用传递给底层集合）
+
+#### 同步试图
+
+使用同步视图来保证多线程操作的安全性。例如，Collections类的`synchronizedMap`方法可以将任何一个Map对象转换成具有同步访问方法的Map
+
+```java
+Map<String, Employee> map = Collections.synchronizedMap(new HashMap<String, Employee>());
+```
+
+#### 受查视图
+
+该视图用来对泛型类型发生问题时提供调试支持。例如：
+
+```java
+ArrayList<String> strings = new ArraysList<>();
+ArrayList rowList = strings;
+rowList.add(new Date());
+```
+
+因为这里使用了一个原始类型引用来指向strings对象，所以当向该对象中添加非String类型时，编译器无法检测出来，只有在运行时才可能抛出异常。
+
+使用受查视图：
+
+```java
+List<String> safeStrings = Collections.checkedList(strings, String.class);
+
+ArrayList rowList = safeStrings;
+rowList.add(new Date()); // Error ClassCastException
+```
+
+但是，受查视图受限于虚拟机可以运行的运行时检查。例如，对于`ArrayList<Pair<String>>`，由于虚拟机有一个单独的“原始”Pair类，所以，无法阻止插入`Pair<Date>` 。
+
+#### [可选操作]() 
