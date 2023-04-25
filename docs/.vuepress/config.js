@@ -8,10 +8,18 @@ module.exports = {
       {
         text: 'java',
         link: '/java/'
+      },
+      {
+        text: 'spring',
+        link: '/spring/'
       }
     ],
     // 侧边栏设置
     sidebar: {
+      '/spring/': [
+        '',
+        'spring'
+      ],
       '/java/': [
         '',
         '01-JAVA语言特性',
