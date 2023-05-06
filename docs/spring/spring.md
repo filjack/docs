@@ -1,5 +1,7 @@
 # Spring
 
+<img :src="$withBase='/img/class-extends-chain.png'" class="align-center"/>
+
 ## IoC
 
 控制反转，将依赖对象的创建与初始化交给容器来执行。

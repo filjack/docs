@@ -12,6 +12,10 @@ module.exports = {
       {
         text: 'spring',
         link: '/spring/'
+      },
+      {
+        text: '操作系统',
+        link: '/os/'
       }
     ],
     // 侧边栏设置
@@ -61,6 +65,10 @@ module.exports = {
         '附录-JavaBean',
         '附录-类加载器',
         '附录-注解'
+      ],
+      '/os/': [
+        '',
+        '基本概念'
       ]
     },
     // 设置页面滚动为平滑滚动
