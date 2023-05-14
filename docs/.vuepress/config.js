@@ -6,16 +6,20 @@ module.exports = {
   themeConfig: {
     nav: [
       {
-        text: 'java',
+        text: 'JAVA',
         link: '/java/'
       },
       {
-        text: 'spring',
+        text: 'SPRING',
         link: '/spring/'
       },
       {
         text: '操作系统',
         link: '/os/'
+      },
+      {
+        text: '数据结构',
+        link: '/ds/'
       }
     ],
     // 侧边栏设置
@@ -74,6 +78,10 @@ module.exports = {
         '调度',
         '进程调度',
         '调度算法'
+      ],
+      '/ds/': [
+        '',
+        '数组和字符串'
       ]
     },
     // 设置页面滚动为平滑滚动
