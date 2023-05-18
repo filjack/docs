@@ -66,6 +66,8 @@ public interface EmployeeManage.Test {
 
 默认方法可以调用该接口中的任何方法（包括静态方法），任何域（接口中的域都是public static final的）
 
+默认方法不能被final修饰符修饰
+
 #### 接口演化
 
 默认方法的一个重要用法，提供兼容性。
