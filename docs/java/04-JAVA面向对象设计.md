@@ -466,6 +466,11 @@ both methods have same erasure, yet neither hides the other
 
 - 抽象类不能被实例化，但是可以声明抽象类的变量，引用子类的对象
 
+##### 抽象类中设置构造方法的目的
+
+- 初始化抽象类中的一些属性
+- 执行一些必要的逻辑处理，例如：安全检查、参数验证等等
+
 #### Object类
 
 object类是JAVA中所有类的超类（默认，如果没有明确指出，那么该类的直接超类就是object）。
