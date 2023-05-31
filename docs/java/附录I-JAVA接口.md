@@ -137,7 +137,7 @@ class TimerPrint implements ActionListener {
 
 ## 克隆
 
-`Cloneable` 接口，一个标记接口（接口中没有方法），如果自己实现克隆，需要实现该接口。
+`Cloneable` 接口，一个标记接口（接口中没有方法），如果自己实现克隆，需要实现该接口。实现了`Cloneable`接口的类可以可以调用`clone()`进行复制，如果没有实现该接口就进行调用，则会抛出 `CloneNotSupportedException`。且由于`clone()`是Object类中的protected方法，所以只有**在类中或者子类中才可以调用**
 
 ### 浅拷贝
 
