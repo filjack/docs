@@ -8,6 +8,11 @@ JAVA字符串由 `char` 值序列组成。
 
 ### 常用方法
 
+#### 查找
+
+- `lastIndexOf(String)` 
+- `indexOf(String)`
+
 #### 子串
 
 - substring(start, end)，区间范围**[start,end)**;
@@ -34,6 +39,11 @@ String all = String.join(" / ","S","M","L","XL");
 // "S / M / L / XL"
 ```
 
+#### 分割
+
+- split(String)
+- StringTokennizer类
+
 #### 比较
 
 注意，不要使用 `==` 来进行比较，这只能确定两个字符串是否存储在同一位置上：同一位置上必然相等，但是也有可能相同字符串存储在不同位置。
@@ -47,6 +57,15 @@ s.equals(t);
 
 - `equalsIgnoreCase`
   忽略大小写
+- regionMatches
+
+#### 修改
+
+- replace(String, String)
+
+#### 反转
+
+- reverse()
 
 ### 空串与Null值
 

@@ -52,7 +52,7 @@
 
 ### 函数式接口
 
-对于只有一个抽象方法的[接口](./附录I-JAVA接口.md) ，这种接口称为函数式接口（functional interface）。需要这种接口的对象时，可以提供一个lambda表达式替代。
+对于**只有一个抽象方法**的[接口](./附录I-JAVA接口.md) ，这种接口称为函数式接口（functional interface）。**可以有多个非抽象方法**。需要这种接口的对象时，可以提供一个**lambda表达式**替代。
 可以直接将表达式赋值给函数式接口变量：
 
 ```java
@@ -90,6 +90,34 @@ ActionListener listener = event -> {
 
 该注解用来标识接口是一个函数式接口，该接口在编译时会被编译器检查。但是并不是必须的，实际上根据定义，任何只有一个抽象方法的接口都是函数式接口。
 
+#### 示例
+
+```java
+public class Test {
+
+    public static void main(String[] args) {
+        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
+        System.out.println("all");
+        eval(list, n -> true);
+        System.out.println("even number");
+        eval(list, n -> n % 2 == 0);
+    }
+    
+    public static void eval(List<Integer> list, Predicate<Integer> predicate) {
+        for (Integer n : list) {
+            if (predicate.test(n)) {
+                System.out.print(n + " ");
+            }
+        }
+        System.out.println();
+    }
+
+
+}
+```
+
+
+
 ### 方法引用
 
 方法引用就像是lambda表达式的简易版本，不使用lambda表达式是因为已经有现成的方法可供使用。
@@ -116,7 +144,7 @@ ActionListener listener = event -> {
 
   
 
-- `Class::instanceMethod` 类::类的实例对象的方法：这样写，那么转换成lambda表达式时，第一个参数会成为方法的目标，即方法的调用方
+- `Class::instanceMethod` 类::类的实例对象的方法，这样写，那么转换成lambda表达式时，第一个参数会成为方法的目标，即方法的调用方
 
   ```
   String::compareToIgnoreCase <=>
@@ -189,9 +217,9 @@ Person[] men = people.stream()
 
 对于没有在表达式内部，即代码块中声明的变量，对于`lambda`表达式来说叫做自由变量值。表达式会捕获（captured）该值。这种概念叫做[闭包（closure）]() ，在JAVA中，lambda表达式就是闭包。
 
-**自由变量值的限制：** 最终变量（effectively final），即该变量在初始化之后就不会再为它赋新值。不一定非要是final修饰的，现实意义上的不变也是允许的。这是因为如果并发执行多个动作时，自由变量值可变不安全。
+**自由变量值的限制：** 最终变量（effectively final），**即该变量在初始化之后就不会再为它赋新值**。不一定非要是final修饰的，现实意义上的不变也是允许的。这是因为如果并发执行多个动作时，自由变量值可变不安全。
 
-lambda表达式的代码块与它所嵌套的代码块有着相同的作用域。所以要注意重名问题。
+lambda表达式的代码块与它所嵌套的代码块有着相同的作用域。所以要**注意重名问题**。
 
 ### Comparator*
 
