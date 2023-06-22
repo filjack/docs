@@ -10,6 +10,10 @@ module.exports = {
         link: '/java/'
       },
       {
+        text: 'SQL',
+        link: '/sql/'
+      },
+      {
         text: 'SPRING',
         link: '/spring/'
       },
@@ -31,6 +35,15 @@ module.exports = {
       '/spring/': [
         '',
         'spring'
+      ],
+      '/sql/': [
+        '',
+        'mysql',
+        'mysql_NULL详解',
+        'mysql事件',
+        'mysql事务处理',
+        'mysql数据类型',
+        'mysql触发器'
       ],
       '/java/': [
         '',
