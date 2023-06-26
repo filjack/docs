@@ -1,3 +1,5 @@
+# 基本知识
+
 ## 命令
 
 终端常用的命令
@@ -910,6 +912,78 @@ from products;
 接受两个参数，如果不是`NULL`，则返回第一个参数。 否则，`IFNULL`函数返回第二个参数。两个参数可以是文字值或表达式。
 
 应避免在[WHERE](http://www.yiibai.com/mysql/where.html)子句中使用`IFNULL`函数，因为它会降低查询的性能。如果要检查值是否为`NULL`，则可以在`WHERE`子句中使用`IS NULL`或`IS NOT NULL`。
+
+#### `if(value, t, f)`
+
+如果value为false，则返回t，否则返回f
+
+#### `case when val1 then res1 else default end`
+
+如果val1为true，则返回res1，否则返回default，可以有多个`when...then...`语句
+
+#### `case expr when val1 then res1 else default end`
+
+如果expr的值为val1，则返回res1，否则返回default，可以有多个`when...then...`语句
+
+## 约束
+
+作用于表上字段的规则，用于限制存储在表中的数据，期望保证数据的正确性、有效性、完整性。
+
+### 分类
+
+#### 非空约束
+
+限制该字段数据不能为NULL
+
+```sql
+NOT NULL;
+```
+
+
+
+#### 唯一约束
+
+保证该字段的所有数据都是唯一、不重复的
+
+```sql
+UNIQUE
+```
+
+#### 主键约束
+
+主键是一行数据的唯一标识，要求非空且唯一
+
+```sql
+PRIMARY KEY
+```
+
+#### 默认约束
+
+保存数据时，如果数据未指定该字段值，则采用默认值
+
+```sql
+DEFAULT
+```
+
+#### 检查约束
+
+*8.0.16版本之后添加*
+
+保证字段值满足某一个条件
+
+```sql
+CHECK
+```
+
+#### 外键约束
+
+用来让两张表的数据之间建立联系，保证数据的一致性和完整性。
+
+```sql
+FOREIGN KEY
+```
+
+
 
 ## 查询
 
