@@ -60,7 +60,7 @@ create table customers if not exists
 
 获取最后一个 `auto_increment` 的值
 
-```mysql
+```sql
 select last_insert_id();
 ```
 
@@ -141,7 +141,7 @@ rename table table1 to t1,table2 to t2;
 
 #### 插入完整行
 
-```mysql
+```sql
 insert into customers values(null,'Pep E. LaPew','100 Main Street', 'Los Angeles','CA','90046','USA',null,null);
 # cust_id 为null，这是因为每次插入新行，该列可由mysql自增，这里的null被mysql忽略，由mysql自动插入下一个可用的cust_id。如果我们不想赋值，但是又不能省略，就用null。
 ```
@@ -155,7 +155,7 @@ insert into customers values(null,'Pep E. LaPew','100 Main Street', 'Los Angeles
 
 #### 插入多行
 
-```mysql
+```sql
 insert into customers(cust_name,cust_address,cust_city,cust_state,cust_zip,cust_country) 
 values ('M. Martian','42 Galaxy Way','New York','NY','11213','USA'),
 ('Pep E. LaPew','50 Main Street','Los Angeles','VA','90046','USA');
@@ -165,7 +165,7 @@ values ('M. Martian','42 Galaxy Way','New York','NY','11213','USA'),
 
 #### 插入查询结果
 
-```mysql
+```sql
 insert into customers(cust_id,cust_contact,cust_email,cust_address,cust_citycust_state,cust_zip,cust_country)
 select cust_id,cust_contact,cust_email,cust_address,cust_citycust_state,cust_zip,cust_country from custnew;
 ```
@@ -176,7 +176,7 @@ select cust_id,cust_contact,cust_email,cust_address,cust_citycust_state,cust_zip
 
 **`select into from`** ：将查询出来的数据整理到一张新表中保存，表结构与查询结构一致。
 
-```mysql
+```sql
 select *（查询出来的结果） into newtable（新的表名）from oldtable where （后续条件）
 ```
 
@@ -184,7 +184,7 @@ select *（查询出来的结果） into newtable（新的表名）from oldtable
 
 **`insert into select`** ：为已经存在的表批量添加新数据。
 
-```mysql
+```sql
 insert into  (准备好的表) select *（或者取用自己想要的结构）from 表名 where 各种条件
 ```
 
@@ -198,17 +198,17 @@ insert into  (准备好的表) select *（或者取用自己想要的结构）fr
 
  `update` 可以跟随 `select` 子查询，但是子查询查询的表不能是要更新的表。
 
-```mysql
+```sql
 update customers set cust_email = (select prod_name from products where prod_id = 'ANV01') where cust_id = 10005;
 ```
 
  `update join` 
 
-```mysql
+```sql
 update employees inner join merits on employees.performance = merits.performance set salary = salary + salary + percentage;
 ```
 
-```mysql
+```sql
 update employees e left join merits m on e.performance = m.performance set salary = salary + salary * 0.1 where m.percentage is null;
 ```
 
@@ -216,7 +216,7 @@ update employees e left join merits m on e.performance = m.performance set salar
 
 #### 更新多个表
 
-```mysql
+```sql
 update products p,customers c set p.prod_name = 'xpf',c.cust_name = 'xpf' where p.prod_id = 'ANV01' and c.cust_id = 10005;
 ```
 
@@ -224,7 +224,7 @@ update products p,customers c set p.prod_name = 'xpf',c.cust_name = 'xpf' where 
 
 1. 更行多行，如果中间出错，会回退所有更改。如果想要跳过错误继续执行，使用 `ignore` 关键字
 
-   ```mysql
+   ```sql
    update ignore customers ...
    ```
 
@@ -234,7 +234,7 @@ update products p,customers c set p.prod_name = 'xpf',c.cust_name = 'xpf' where 
 
 ### 
 
-```mysql
+```sql
 delete from customers where cust_id = 10006;
 ```
 
@@ -248,7 +248,7 @@ delete from customers where cust_id = 10006;
 
 去掉结果中重复的值。
 
-```mysql
+```sql
 select distinct vend_id from products;
 ```
 
@@ -258,7 +258,7 @@ select distinct vend_id from products;
 
 - 作用于多列，将其看作一个组合体对待。
 
-  ```mysql
+  ```sql
   SELECT DISTINCT
       state, city
   FROM
@@ -272,7 +272,7 @@ select distinct vend_id from products;
 
 - 可以用于聚合函数中，在聚合函数起作用之前先去重。只能用在指定了列名的情况下，所以 `count(distinct *)` 报错，也不能用在计算或表达式中。
 
-  ```mysql
+  ```sql
   SELECT 
       COUNT(DISTINCT state)
   FROM
@@ -287,19 +287,19 @@ select distinct vend_id from products;
 
 - 只有一个参数，表示返回的最大行数
 
-  ```mysql
+  ```sql
   select prod_name from products limit 5;
   ```
 
 - 两个参数，第一个表示第一行的偏移量，也就是从第几行开始，首行为0；第二个参数表示返回的最大行数
 
-  ```mysql
+  ```sql
   select prod_name from products limit 3,4; # 从行3开始取4行结束
   ```
 
   也可以写成
 
-  ```mysql
+  ```sql
   select prod_name from products limit 4 offset 3;
   ```
 
@@ -309,25 +309,25 @@ select distinct vend_id from products;
 
 - 按单个列排序
 
-  ```mysql
+  ```sql
   select prod_name from products order by prod_name;
   ```
 
 - 按多个列排序
 
-  ```mysql
+  ```sql
   select prod_id,prod_name,prod_price from products order by prod_price , prod_name; # 先按价格排序，然后相同的价格之间按名称排序
   ```
 
 - 按表达式进行排序
 
-  ```mysql
+  ```sql
   select prod_id,prod_name,prod_price*0.5 from products order by prod_price*0.5 desc;
   ```
 
 - 根据 `field()` 自定义排序
 
-  ```mysql
+  ```sql
   select prod_id,prod_name,prod_price from products order by field(prod_price,'55','2.5','50','3.42','10');
   +---------+----------------+------------+
   | prod_id | prod_name      | prod_price |
@@ -358,7 +358,7 @@ select distinct vend_id from products;
 
 - 检查具有 `null` 值的列。
 
-  ```mysql
+  ```sql
   select cust_id from customers where cust_email is null;
   ```
 
@@ -366,7 +366,7 @@ select distinct vend_id from products;
 
 - 后跟 `()` ，查询括号范围中的数据。
 
-  ```mysql
+  ```sql
   select prod_name,prod_price,vend_id from products where vend_id in (1002,1003);
   ```
 
@@ -389,7 +389,7 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
 
 - `%` 任何字符出现任意次数，无法匹配 `null` 
 
-  ```mysql
+  ```sql
   select prod_id,prod_name from products where prod_name like 'jet%';
   +---------+--------------+
   | prod_id | prod_name    |
@@ -401,7 +401,7 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
 
 - `_` 匹配单个字符
 
-  ```mysql
+  ```sql
   select prod_id,prod_name from products where prod_name like '_ ton anvil';
   ```
 
@@ -411,13 +411,13 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
 
 - 确实使用通配符，不要将其用在搜索模式开始处（匹配表达式最左侧）
 
-  ```mysql
+  ```sql
   select prod_id,prod_name from products where prod_name like '_ ton anvil'; # 不该放在开头
   ```
 
 ### 正则表达式（ `regexp` ）
 
-- ```mysql
+- ```sql
   select prod_name from products where prod_name regexp '1000' order by prod_name;
   +--------------+
   | prod_name    |
@@ -426,7 +426,7 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
   +--------------+
   ```
 
-- ```mysql
+- ```sql
   select prod_name from products where prod_name regexp '.000' order by prod_name;
   +--------------+
   | prod_name    |
@@ -436,7 +436,7 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
   +--------------+
   ```
 
-- ```mysql
+- ```sql
   select prod_name from products where prod_name regexp '1000|2000' order by prod_name;
   +--------------+
   | prod_name    |
@@ -448,7 +448,7 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
 
 - 匹配特定字符 `[]` 
 
-  ```mysql
+  ```sql
   select prod_name from products where prod_name regexp '[123] Ton' order by prod_name;
   +-------------+
   | prod_name   |
@@ -460,7 +460,7 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
 
 - 否定字符集 `[^]` 
 
-  ```mysql
+  ```sql
   select prod_name from products where prod_name regexp '[^123] Ton' order by prod_name;
   +--------------+
   | prod_name    |
@@ -471,7 +471,7 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
 
 - 范围匹配 `[1-5]` 
 
-  ```mysql
+  ```sql
   select prod_name from products where prod_name regexp '[1-5] Ton' order by prod_name;
   +--------------+
   | prod_name    |
@@ -484,7 +484,7 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
 
 - 匹配特殊字符，需要转义 `\\` 
 
-  ```mysql
+  ```sql
   select vend_name from vendors where vend_name regexp '\\.' order by vend_name;
   +--------------+
   | vend_name    |
@@ -495,7 +495,7 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
 
 -  <img :src="$withBase='/img/regexp1.jpg'" class="align-center" />
 
-  ```mysql
+  ```sql
   select prod_name from products where prod_name regexp '[:digit:] Ton' order by prod_name;
   +--------------+
   | prod_name    |
@@ -508,7 +508,7 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
 
 - <img :src="$withBase='/img/regexp2.jpg'" class="align-center" />
 
-  ```mysql
+  ```sql
   select prod_name from products where prod_name regexp '\\([0-9] sticks?\\)' order by prod_name;
   +----------------+
   | prod_name      |
@@ -520,7 +520,7 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
 
 - <img :src="$withBase='/img/regexp3.jpg'" class="align-center" />
 
-  ```mysql
+  ```sql
   select prod_name from products where prod_name regexp '^[[:digit:]\\.]';
   +--------------+
   | prod_name    |
@@ -533,7 +533,7 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
 
 - 正则表达式测试，`regexp` 返回0（没有匹配）1（匹配）
 
-  ```mysql
+  ```sql
   select 'hello' regexp '[0-9]';
   +------------------------+
   | 'hello' regexp '[0-9]' |
@@ -546,7 +546,7 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
 
 ###  `group by` 
 
-```mysql
+```sql
 select vend_id,count(*) num_prods from products group by vend_id;
 ```
 
@@ -558,7 +558,7 @@ select vend_id,count(*) num_prods from products group by vend_id;
 
 3. `group by` 子句中每列都必须是检索列或者有效的表达式（不能是聚集函数）。假如在 `select` 中使用表达式， `group by` 中必须指定相同的表达式。可以识别别名。
 
-   ```mysql
+   ```sql
    select vend_id as id ,count(*) num_prods from products group by id;
    ```
 
@@ -578,14 +578,14 @@ select vend_id,count(*) num_prods from products group by vend_id;
 
 支持所有 `where` 操作符。但是 `where` 在数据分组前进行过滤， `having` 在数据分组后进行过滤。
 
-```mysql
+```sql
 select vend_id, count(*) as num from products where prod_price  >= 10 group by vend_id having count(*) >= 2; # 过滤出拥有至少两种价格在10以上的商品的生产商
 ```
 
 与 `order by` 区别
 <img :src="$withBase='/img/group_by&order_by.jpg'" class="align-center" />
 
-```mysql
+```sql
 select sum(quantity*item_price) as ordertotal,order_num from orderitems group by order_num having sum(quantity*item_price) >= 50 order by ordertotal;
 +------------+-----------+
 | ordertotal | order_num |
@@ -604,7 +604,7 @@ select sum(quantity*item_price) as ordertotal,order_num from orderitems group by
 
 子查询受限制，不允许有`compute`子句和`into`关键字。
 
-```mysql
+```sql
 SELECT c.CustomerId,CompanyName FROM Customers c
 WHERE EXISTS(
 SELECT OrderID FROM Orders o WHERE o.CustomerID=c.CustomerID)
@@ -612,7 +612,7 @@ SELECT OrderID FROM Orders o WHERE o.CustomerID=c.CustomerID)
 
 当在子查询中使用 `NULL` 时，仍然返回结果集
 
-```mysql
+```sql
 select * from tableIn where exists(select null);
 # 等同于
 select * from tableIn;
@@ -647,7 +647,7 @@ between and 在指定的两个值之间（包括两端）
 
 ####  `concat()` 
 
-```mysql
+```sql
 select concat(vend_name,'(',vend_country,')') from vendors order by vend_name;
 +----------------------------------------+
 | concat(vend_name,'(',vend_country,')') |
@@ -665,7 +665,7 @@ select concat(vend_name,'(',vend_country,')') from vendors order by vend_name;
 
 去掉空格。
 
-```mysql
+```sql
 select concat(rtrim(vend_name),' (',rtrim(vend_country),')') from vendors order by vend_name;
 ```
 
@@ -673,7 +673,7 @@ select concat(rtrim(vend_name),' (',rtrim(vend_country),')') from vendors order 
 
 转为大写。
 
-```mysql
+```sql
 select vend_name,upper(vend_name) as vend_name_upper from vendors order by vend_name;
 ```
 
@@ -681,7 +681,7 @@ select vend_name,upper(vend_name) as vend_name_upper from vendors order by vend_
 
 转为小写。
 
-```mysql
+```sql
  select vend_name,lower(vend_name) as vend_name_upper from vendors order by vend_name;
 ```
 
@@ -689,7 +689,7 @@ select vend_name,upper(vend_name) as vend_name_upper from vendors order by vend_
 
 将 `str` 从左返回指定的长度 `length` 。
 
-```mysql
+```sql
  select vend_name,left(vend_name,3) as vend_name_upper from vendors order by vend_name;
 ```
 
@@ -701,7 +701,7 @@ select vend_name,upper(vend_name) as vend_name_upper from vendors order by vend_
 
 返回 `str` 的长度。
 
-```mysql
+```sql
 select vend_name,length(vend_name) as vend_name_upper from vendors order by vend_name;
 ```
 
@@ -709,7 +709,7 @@ select vend_name,length(vend_name) as vend_name_upper from vendors order by vend
 
 返回 `substr` 子串在 `str` 中首次出现的位置（首位为1）， `pos` 表示从第几位开始查。
 
-```mysql
+```sql
 select locate('bar','foobarbar');
 +---------------------------+
 | locate('bar','foobarbar') |
@@ -728,7 +728,7 @@ select locate('bar','foobarbar',5);
 
 - `substring(str,pos)`  `substring(str from pos)` 从位置 `pos` 开始截取
 
-  ```mysql
+  ```sql
    select substring('Quadratically',5);
    select substring('Quadratically' from 5);
   +-----------------------------------+
@@ -738,7 +738,7 @@ select locate('bar','foobarbar',5);
 
 - `substring(str,pos,len)`  `substring(str from pos for len)` 从位置 `pos` 开始截取长度为 `len` 的字符串
 
-  ```mysql
+  ```sql
   select substring('Quadratically',5,3);
   select substring('Quadratically'from 5 for 3);
   +----------------------------------------+
@@ -750,7 +750,7 @@ select locate('bar','foobarbar',5);
 
 匹配发音相似的列值。
 
-```mysql
+```sql
 select cust_name,cust_contact from customers where cust_contact = 'Y. Lie';
 Empty set
 select cust_name,cust_contact from customers where soundex(cust_contact) = soundex('Y. Lie');
@@ -768,7 +768,7 @@ select cust_name,cust_contact from customers where soundex(cust_contact) = sound
 
 查询日期位2005年9月1日的订单
 
-```mysql
+```sql
 select cust_id,order_num from orders where order_date = '2005-09-01';
 +---------+-----------+
 | cust_id | order_num |
@@ -779,7 +779,7 @@ select cust_id,order_num from orders where order_date = '2005-09-01';
 
 建议写成：
 
-```mysql
+```sql
 select cust_id,order_num from orders where date(order_date) = '2005-09-01';
 +---------+-----------+
 | cust_id | order_num |
@@ -790,7 +790,7 @@ select cust_id,order_num from orders where date(order_date) = '2005-09-01';
 
 查询2005年9月所有订单
 
-```mysql
+```sql
 select cust_id,order_num from orders where Date(order_date) between '2005-09-01' and '2005-09-30';
 +---------+-----------+
 | cust_id | order_num |
@@ -803,7 +803,7 @@ select cust_id,order_num from orders where Date(order_date) between '2005-09-01'
 
 还可以写成：
 
-```mysql
+```sql
 select cust_id,order_num from orders where year(order_date) = '2005' and month(order_date) = '9';
 +---------+-----------+
 | cust_id | order_num |
@@ -826,25 +826,25 @@ select cust_id,order_num from orders where year(order_date) = '2005' and month(o
 
 - 只能用于单个列，如需多个列的平均值，每个列都要使用该函数。
 
-  ```mysql
+  ```sql
   select avg(prod_price) avg_price from products;
   ```
 
 - 结合 `distinct` 获取不同值的平均值
 
-  ```mysql
+  ```sql
   SELECT AVG(DISTINCT buyprice) FROM products;
   ```
 
 - 结合 `group by` 使用，查询每组值的平均值。
 
-  ```mysql
+  ```sql
   select vend_id,avg(prod_price) from products group by vend_id;
   ```
 
 - 结合 `having` 在分组中过滤
 
-  ```mysql
+  ```sql
   select vend_id,avg(prod_price) from products group by vend_id having avg(prod_price) >10;
   ```
 
@@ -852,13 +852,13 @@ select cust_id,order_num from orders where year(order_date) = '2005' and month(o
 
 - 对表中行数进行计数
 
-  ```mysql
+  ```sql
   select count(*) as num_cust from customers;
   ```
 
 - 对某一列进行计数，此时会忽略 `null` 值
 
-  ```mysql
+  ```sql
   select count(cust_email) as num_cust from customers;
   ```
 
@@ -866,7 +866,7 @@ select cust_id,order_num from orders where year(order_date) = '2005' and month(o
 
 返回指定列中的最大值。数值或者日期返回最大值，文本值返回字符串比较方式的最大值。忽略 `null` 值。
 
-```mysql
+```sql
 select max(prod_price) as max_price from  products;
 ```
 
@@ -880,19 +880,19 @@ select max(prod_price) as max_price from  products;
 
 - 返回指定列值的和
 
-  ```mysql
+  ```sql
   select sum(quantity) as items_ordered from orderitems where order_num = 20005;
   ```
 
 - 可以用来对计算值求和
 
-  ```mysql
+  ```sql
   select sum(item_price*quantity) as total_price from orderitems where order_num = 20005;
   ```
 
  `select` 语句可以跟随多个聚集函数
 
-```mysql
+```sql
 select count(*) num_items,
 min(prod_price) price_min,
 max(prod_price) price_max,
@@ -991,7 +991,7 @@ FOREIGN KEY
 
 - 用在 `where` 子句进行过滤
 
-  ```mysql
+  ```sql
   select cust_id from orders where order_num in (select order_num from orderitems where prod_id = 'TNT2');
   +---------+
   | cust_id |
@@ -1003,7 +1003,7 @@ FOREIGN KEY
 
 - 用在 `select` 做相关子查询
 
-  ```mysql
+  ```sql
   select cust_name,cust_state,(select count(*) from orders where orders.cust_id = customers.cust_id) as orders
   from customers
   order by cust_name;
@@ -1026,7 +1026,7 @@ FOREIGN KEY
 
 #### 等值联结（内部联结）
 
-```mysql
+```sql
 select vend_name,prod_name,prod_price from vendors,products where vendors.vend_id = products.vend_id order by vend_name,prod_name;
 +-------------+----------------+------------+
 | vend_name   | prod_name      | prod_price |
@@ -1050,13 +1050,13 @@ select vend_name,prod_name,prod_price from vendors,products where vendors.vend_i
 
 或写为：
 
-```mysql
+```sql
 select vend_name,prod_name,prod_price from vendors inner join products on vendors.vend_id = products.vend_id order by vend_name,prod_name;
 ```
 
 #### 自联结
 
-```mysql
+```sql
 select prod_id,prod_name from products where vend_id in (select vend_id from products where prod_id = 'DTNTR'); # 使用子查询
 select p1.prod_id ,p1.prod_name from products p1,products p2 where p1.vend_id = p2.vend_id and p2.prod_id = 'DTNTR'; # 使用自联结
 +---------+----------------+
@@ -1076,7 +1076,7 @@ select p1.prod_id ,p1.prod_name from products p1,products p2 where p1.vend_id = 
 
 在内部联结（等值联结）的基础上，剔除相同的列。
 
-```mysql
+```sql
 select c.*,o.order_num,o.order_date,oi.prod_id,oi.quantity,oi.item_price from customers c,orders o,orderitems oi where c.cust_id = o.cust_id and o.order_num = oi.order_num and prod_id = 'FB';
 ```
 
@@ -1084,7 +1084,7 @@ select c.*,o.order_num,o.order_date,oi.prod_id,oi.quantity,oi.item_price from cu
 
   ***`mysql` 不支持完全的外部联结，只有左外部联结或者右外部联结。*** 
 
-```mysql
+```sql
 select c.cust_id, o.order_num from customers c left outer join orders o on c.cust_id = o.cust_id;
 +---------+-----------+
 | cust_id | order_num |
@@ -1098,7 +1098,7 @@ select c.cust_id, o.order_num from customers c left outer join orders o on c.cus
 +---------+-----------+
 ```
 
-```mysql
+```sql
 select c.cust_id, o.order_num from customers c right outer join orders o on c.cust_id = o.cust_id;
 +---------+-----------+
 | cust_id | order_num |
@@ -1113,7 +1113,7 @@ select c.cust_id, o.order_num from customers c right outer join orders o on c.cu
 
 #### 聚集函数配合联结
 
-```mysql
+```sql
 select c.cust_name,c.cust_id ,count(o.order_num) as num from customers c left join orders o on c.cust_id = o.cust_id group by c.cust_id;
 ```
 
@@ -1134,7 +1134,7 @@ select c.cust_name,c.cust_id ,count(o.order_num) as num from customers c left jo
 
 会取消重复行。
 
-```mysql
+```sql
 select prod_id,prod_name,prod_price from products where vend_id in (1001,1002) union select prod_id,prod_name,prod_price from products where prod_price <= 5 order by prod_price;
 ```
 
@@ -1152,7 +1152,7 @@ select prod_id,prod_name,prod_price from products where vend_id in (1001,1002) u
 
 在创建表时启用全文本搜索
 
-```mysql
+```sql
 CREATE TABLE `productnotes` (
   `note_id` int NOT NULL AUTO_INCREMENT,
   `prod_id` char(10) NOT NULL,
@@ -1172,17 +1172,17 @@ CREATE TABLE `productnotes` (
 -  `match()` 指定被搜索的列。传递给该函数的值必须与 `fulltext` 中定义的相同。如果有多个列，必须列出他们，次序正确。
 -  `against()` 指定要使用的搜索表达式
 
-```mysql
+```sql
 select note_text from productnotes where match(note_text) against('customer,rabbit');
 ```
 
-```mysql
+```sql
 select note_text from productnotes where match(note_text) against('rabbit'); # 找出note_text列中包括rabbit值的所有值
 ```
 
 搜索结果有排序，较高等级先返回（匹配度越高）
 
-```mysql
+```sql
 select note_text,match(note_text) against('rabbit') as pipeidu from productnotes; # 返回每一列，和每一列的匹配度
 ```
 
@@ -1192,7 +1192,7 @@ select note_text,match(note_text) against('rabbit') as pipeidu from productnotes
 
 根据一个匹配条件进行基本的全文本搜索，然后 `mysql` 基于结果，判定出结果中所有有用的词，然后根据初始匹配条件和这些有用的词进行第二次全文本搜索。 `with query expansion` 。
 
-```mysql
+```sql
 select note_text from productnotes where match(note_text) against('anvils');
 ----------------------
 note_text
@@ -1200,7 +1200,7 @@ note_text
 Multiple customer returns, anvils failing to drop fast enough or falling backwards on purchaser. Recommend that customer considers using heavier anvils. 
 ```
 
-```mysql
+```sql
 select note_text from productnotes where match(note_text) against('anvils' with query expansion);
 -----------------------------------------------------------
 note_text                                                     
@@ -1231,11 +1231,11 @@ Matches not included, recommend purchase of matches or detonator (item DTNTR).
 4. 表达式分组
 5. 如果没有 `fulltext` 索引也可以使用，但是性能随数据量增大而降低
 
-```mysql
+```sql
 select note_text from productnotes where match(note_text) against('heavy' in boolean mode); # 包含heavy
 ```
 
-```mysql
+```sql
 select note_text from productnotes where match(note_text) against('heavy -rope*' in boolean mode); # 包含heavy 除去以rope开头的
 ```
 
@@ -1279,7 +1279,7 @@ select note_text from productnotes where match(note_text) against('heavy -rope*'
 
 - 创建视图
 
-  ```mysql
+  ```sql
   create view;
   
   create view productcustomers as select cust_name,cust_contact,prod_id from customers,orders,orderitems where customers.cust_id = orders.cust_id and orderitems.order_num = orders.order_num;
@@ -1287,13 +1287,13 @@ select note_text from productnotes where match(note_text) against('heavy -rope*'
 
 - 删除视图
 
-  ```mysql
+  ```sql
   drop view view_name;
   ```
 
 - 更改视图
 
-  ```mysql
+  ```sql
   # 先删除后创建
   drop view view_name;
   create view
@@ -1303,7 +1303,7 @@ select note_text from productnotes where match(note_text) against('heavy -rope*'
 
 - 查看创建视图的语句
 
-  ```mysql
+  ```sql
   show create view view_name;
   ```
 
@@ -1339,7 +1339,7 @@ select note_text from productnotes where match(note_text) against('heavy -rope*'
 
 ### 创建
 
-```mysql
+```sql
 create procedure productpricing()
 begin
 	select avg(prod_price) as priceaverage from products;
@@ -1350,7 +1350,7 @@ end;
 
 当使用 `MySQL` 命令窗口创建时，由于分隔符 `;` 的原因会报错，此时应该临时更改默认分隔符。
 
-```mysql
+```sql
 delimiter //
 create procedure productpricing()
 begin
@@ -1361,7 +1361,7 @@ delimiter ;
 
 ### 使用变量
 
-```mysql
+```sql
 create procedure producepricing(
 	out p1 decimal(8,2),
 	out p2 decimal(8,2),
@@ -1381,7 +1381,7 @@ select @pl,@lh,@pa;
 
 ### 传入参数
 
-```mysql
+```sql
 create procedure ordertotal(
    in onumber int,
    out ototal decimal(8,2)
@@ -1396,7 +1396,7 @@ select @total; # 查询返回的20005的订单总数
 
 ### 更强大的创建
 
-```mysql
+```sql
 create procedure ordertotal(
    in onumber int,
    in taxable boolean, #输入Boolean类型（非 0 即为真， 0 为假）
@@ -1432,13 +1432,13 @@ select @total;
 
 ### 调用
 
-```mysql
+```sql
 call productpricing();
 ```
 
 ### 删除
 
-```mysql
+```sql
 drop procedure productpricing;
 drop procedure if exists productpricing;
 ```
@@ -1447,13 +1447,13 @@ drop procedure if exists productpricing;
 
 查看建立一个存储过程的创建语句
 
-```mysql
+```sql
 show create procedure 名字;
 ```
 
 获取存储过程详细信息，包括何时和人等
 
-```mysql
+```sql
 show procedure status; # 展示所有存储过程
 show procedure status like 'ordertotal'; # 进行过滤
 ```
@@ -1470,7 +1470,7 @@ show procedure status like 'ordertotal'; # 进行过滤
 
 - 声明游标
 
-  ```mysql
+  ```sql
   create procedure processorders()
   begin
   	declare ordernumbers cursor for select order_num fro orders;
@@ -1479,20 +1479,20 @@ show procedure status like 'ordertotal'; # 进行过滤
 
 - 打开游标
 
-  ```mysql
+  ```sql
   open ordernumbers;
   ```
 
 - 关闭游标
 
-  ```mysql
+  ```sql
   # 释放游标使用的所有内部内存和资源，如果没有显示关闭，MySQL会隐式的关闭游标，即在到达end语句时自动关闭。
   close ordernumbers;
   ```
 
 - 检索每一行
 
-  ```mysql
+  ```sql
   create procedure processorders()
   begin
   -- 定义变量
@@ -1540,7 +1540,7 @@ show procedure status like 'ordertotal'; # 进行过滤
 
 ### 创建触发器
 
-```mysql
+```sql
 create trigger newproduct after insert on products for each row select 'product added' into @p;
 -- 将返回结果存储在变量中
 ```
@@ -1551,7 +1551,7 @@ create trigger newproduct after insert on products for each row select 'product 
 编码：每个字符集成员的内部表示
 校对：规定字符如何比较的指定
 
-```mysql
+```sql
 show character set; # 显示所有可用的字符集以及每个字符集的描述和默认的校对
 +----------+---------------------------------+---------------------+--------+
 | Charset  | Description                     | Default collation   | Maxlen |
@@ -1601,7 +1601,7 @@ show character set; # 显示所有可用的字符集以及每个字符集的描�
 41 rows in set (0.01 sec)
 ```
 
-```mysql
+```sql
 show collation; # 显示所有可用的校对，以及他们适用的字符集。
 
 # 确定所用的字符集和校对
@@ -1609,7 +1609,7 @@ show variables like '字符集%';
 show variables like '校对%';
 ```
 
-```mysql
+```sql
 # 给表指定默认字符集和校对
 create table mytable( column1 int,column2 varchar(10) ) default character set hebrew collate hebrew_general_ci;
 /*
@@ -1620,12 +1620,12 @@ create table mytable( column1 int,column2 varchar(10) ) default character set he
 */
 ```
 
-```mysql
+```sql
 # 给列指定与表不同的默认字符集和校对
 create table mytable( column1 int,column2 varchar(10) character set latin1 collate latin1_general_ci) default character set hebrew collate hebrew_general_ci;
 ```
 
-```mysql
+```sql
 # 在查询的排序中使用校对
 select * from customers
 order by lastname,firstname collate latin1_genetal_ci;
@@ -1640,14 +1640,14 @@ order by lastname,firstname collate latin1_genetal_ci;
 
 在`mysql` 中的名为 `mysql` 的数据库中的名为 `user` 的表内存有用户信息
 
-```mysql
+```sql
 use mysql; # 使用mysql数据库
 select user from user; # user表中的user列存储的是用户登录名
 ```
 
 ### 创建用户账号
 
-```mysql
+```sql
 create user ben identified by 'p@$$w0rd'; # 创建用户,这样创建的用户无法在本机mysql上登录
 ```
 
@@ -1663,25 +1663,25 @@ create user ben identified by 'p@$$w0rd'; # 创建用户,这样创建的用户�
 
    另：不用用户名也可以本地登录`MySQL`，用的账号就是上面的`@localhost`。
 
-```mysql
+```sql
 create user 'ben'@'localhost' identified by 'p@$$w0rd'; # 这样创建用户就可以在本机mysql登录
 ```
 
 ### 重命名用户
 
-```mysql
+```sql
 rename user ben to bforta; # mysql 5之后才支持，之前直接update user表更改
 ```
 
 ### 删除用户
 
-```mysql
+```sql
 drop user bforta; # mysql 5之后，该语句可以直接删除用户及该用户的权限，在之前，不能删除权限，需要先用revoke语句删除权限
 ```
 
 ### 修改用户密码
 
-```mysql
+```sql
 # mysql 5.7 之前
 set password for ben@localhost = password('lqh24786');
 # 5.7 之后，mysql取消了passowrd()字段
@@ -1690,7 +1690,7 @@ alter user ben@localhost identified by 'lqh24786';
 
 ### 查看用户权限
 
-```mysql
+```sql
 show grants for 用户名; # 有时需要用用户名@主机名来查询
 
 show grants for ben@localhost;
@@ -1703,7 +1703,7 @@ show grants for ben@localhost;
 
 ### 授予用户权限（ `grant` ）
 
-```mysql
+```sql
 grant select on crashcourse.* to ben@localhost; # 赋予ben查询crashcourse库的权限
 
 grant select,update on crashcourse.* to ben@localhost; # 一次授予多个权限
@@ -1711,7 +1711,7 @@ grant select,update on crashcourse.* to ben@localhost; # 一次授予多个权�
 
 ### 删除用户权限（ `revoke` ）
 
-```mysql
+```sql
 revoke select on crashcourse.* from ben@localhost; # 删除ben在crashcourse中查询的权限
 ```
 
@@ -1719,20 +1719,20 @@ revoke select on crashcourse.* from ben@localhost; # 删除ben在crashcourse中�
 
 - 服务器
 
-  ```mysql
+  ```sql
   grant all;
   revoke all;
   ```
 
 - 数据库
 
-  ```mysql
+  ```sql
   on database.*
   ```
 
 - 特定表
 
-  ```mysql
+  ```sql
   on database.table
   ```
 
@@ -1752,7 +1752,7 @@ revoke select on crashcourse.* from ben@localhost; # 删除ben在crashcourse中�
 
 应该先刷新未写数据，保证所有数据都被写入到磁盘中（包括索引数据）
 
-```mysql
+```sql
 flush tables;
 ```
 
@@ -1760,7 +1760,7 @@ flush tables;
 
 - `mysqlhotcopy`
 
-- ```mysql
+- ```sql
   backup table
   select into outfile
   # 转储到某个外部文件，接收系统将要创建的文件名（必须不存在）
@@ -1771,7 +1771,7 @@ flush tables;
 
 - `analyze table` 用来检查表键是否正确。
 
-  ```mysql
+  ```sql
   analyze table orders;
   +--------------------+---------+----------+----------+
   | Table              | Op      | Msg_type | Msg_text |
@@ -1783,7 +1783,7 @@ flush tables;
 - `check table` 用来针对许多问题对表进行检查。在 `MyISAM` 表上还可以对索引进行检查。
   支持一系列用于 `MyISAM` 表的方式。`changed` 检查自最后一次检查以来改动过的表。 `extended` 执行最彻底的检查。 `fast` 只检查未正常关闭的表。 `medium` 检查所有被删除的链接并进行键检验。 `quick` 只进行快速扫描。
 
-  ```mysql
+  ```sql
   check table orders,orderitems;
   +------------------------+-------+----------+----------+
   | Table                  | Op    | Msg_type | Msg_text |
@@ -1839,7 +1839,7 @@ flush tables;
 
 5. `insert` 非常消耗性能，有可能降低等待处理的 `select` 语句的性能。可以设置优先级
 
-   ```mysql
+   ```sql
    insert low_priority into
    ```
 
@@ -1912,7 +1912,7 @@ mysql> help; # mysql语句查询帮助
 
 `select` 测试
 
-```mysql
+```sql
 select 3*2;  # 6
 select trim('  abc  ');  # abc
 select Now();  # 2021-05-26 12:29:12
