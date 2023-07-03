@@ -45,6 +45,7 @@ module.exports = {
         'mysql数据类型',
         'mysql触发器',
         'mysql存储引擎',
+        '索引'
       ],
       '/java/': [
         '',
