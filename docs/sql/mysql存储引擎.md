@@ -78,6 +78,8 @@ ibd2sdi xxx.ibd
 
 <img :src="$withBase='/img/sql-2.png'" class="align-center" />
 
+页是InnoDB磁盘管理的最小单元。
+
 ### MyISAM
 
 是早期MySQL的默认存储引擎
