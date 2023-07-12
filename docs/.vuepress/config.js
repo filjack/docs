@@ -10,6 +10,10 @@ module.exports = {
         link: '/java/'
       },
       {
+        text: 'WEB',
+        link: '/web/'
+      },
+      {
         text: 'SQL',
         link: '/sql/'
       },
@@ -138,6 +142,9 @@ module.exports = {
       '/bk/': [
         '',
         '操作系统课后习题小册'
+      ],
+      '/web/': [
+        '',
       ]
     },
     // 设置页面滚动为平滑滚动
