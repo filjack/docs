@@ -54,7 +54,8 @@ module.exports = {
         'mysql触发器',
         'mysql存储引擎',
         '索引',
-        'SQL优化'
+        'SQL优化',
+        'SQL范式'
       ],
       '/java/': [
         '',
