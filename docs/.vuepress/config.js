@@ -36,13 +36,24 @@ module.exports = {
       {
         text: '小册子',
         link: '/bk/'
+      },
+      {
+        text: '工具',
+        link: '/tools/'
       }
     ],
     // 侧边栏设置
     sidebar: {
       '/spring/': [
         '',
-        'spring'
+        // 'spring',
+        'Spring5',
+        'IoC',
+        'AOP',
+      ],
+      '/tools/': [
+        '',
+        'UML',
       ],
       '/sql/': [
         '',
