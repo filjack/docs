@@ -102,3 +102,9 @@ Session技术是基于Cookie技术实现的。
 
 <img :src="$withBase='/img/session-1.png'" class="align-center" />
 
+## 钝化与活化
+
+> session借助序列化实现
+
+- 钝化：将session对象（存储的数据）序列化到磁盘上存储，一般用于服务器关闭时；或内存不足时，将长时间不用的session钝化
+- 活化：将磁盘上序列化的session对象（存储的数据）反序列化到内存中使用，一般用于服务器开启时；或某个session突然需要被使用时

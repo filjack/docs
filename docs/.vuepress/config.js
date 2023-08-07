@@ -51,6 +51,7 @@ module.exports = {
         'IoC',
         'AOP',
         'Transaction',
+        'springMVC',
       ],
       '/tools/': [
         '',
