@@ -805,7 +805,9 @@ REST：**Re**presentational **S**tate **T**ransfer，表现层资源状态转移
 
 ##### a>资源
 
-资源是一种看待服务器的方式，即，将服务器看作是由很多离散的资源组成。每个资源是服务器上一个可命名的抽象概念。因为资源是一个抽象的概念，所以它不仅仅能代表服务器文件系统中的一个文件、数据库中的一张表等等具体的东西，可以将资源设计的要多抽象有多抽象，只要想象力允许而且客户端应用开发者能够理解。与面向对象设计类似，资源是以名词为核心来组织的，首先关注的是名词。一个资源可以由一个或多个URI来标识。URI既是资源的名称，也是资源在Web上的地址。对某个资源感兴趣的客户端应用，可以通过资源的URI与其进行交互。
+资源是一种看待服务器的方式，即，将服务器看作是由很多离散的资源组成。每个资源是服务器上一个可命名的抽象概念。因为资源是一个抽象的概念，所以它不仅仅能代表服务器文件系统中的一个文件、数据库中的一张表等等具体的东西，可以将资源设计的要多抽象有多抽象，只要想象力允许而且客户端应用开发者能够理解。与面向对象设计类似，**资源是以名词为核心来组织的**，首先关注的是名词。一个资源可以由一个或多个URI来标识。URI既是资源的名称，也是资源在Web上的地址。对某个资源感兴趣的客户端应用，可以通过资源的URI与其进行交互。
+
+**资源组中落地到url上** 
 
 ##### b>资源的表述
 
@@ -851,11 +853,11 @@ b>当前请求必须传输请求参数_method
     <filter-name>HiddenHttpMethodFilter</filter-name>
     <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
 </filter>
+<!--filter-mapping的顺序决定了过滤器的处理顺序-->
 <filter-mapping>
     <filter-name>HiddenHttpMethodFilter</filter-name>
     <url-pattern>/*</url-pattern>
 </filter-mapping>
-12345678
 ```
 
 > 注：
@@ -942,7 +944,7 @@ b>当前请求必须传输请求参数_method
      public Employee() {
      }
   }
-  123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354
+  
   ```
 
 - 准备dao模拟数据
@@ -994,7 +996,6 @@ b>当前请求必须传输请求参数_method
         employees.remove(id);
      }
   }
-  12345678910111213141516171819202122232425262728293031323334353637383940414243444546
   ```
 
 ### 2、功能清单
@@ -1015,7 +1016,6 @@ b>当前请求必须传输请求参数_method
 
 ```xml
 <mvc:view-controller path="/" view-name="index"/>
-1
 ```
 
 ##### b>创建页面
@@ -1032,7 +1032,6 @@ b>当前请求必须传输请求参数_method
 <a th:href="@{/employee}">访问员工信息</a>
 </body>
 </html>
-1234567891011
 ```
 
 ### 4、具体功能：查询所有员工数据
@@ -1046,7 +1045,6 @@ public String getEmployeeList(Model model){
     model.addAttribute("employeeList", employeeList);
     return "employee_list";
 }
-123456
 ```
 
 ##### b>创建employee_list.html
@@ -1085,7 +1083,6 @@ public String getEmployeeList(Model model){
     </table>
 </body>
 </html>
-123456789101112131415161718192021222324252627282930313233
 ```
 
 ### 5、具体功能：删除
@@ -1098,7 +1095,6 @@ public String getEmployeeList(Model model){
     <!-- HiddenHttpMethodFilter要求：必须传输_method请求参数，并且值为最终的请求方式 -->
     <input type="hidden" name="_method" value="delete"/>
 </form>
-12345
 ```
 
 ##### b>删除超链接绑定点击事件
@@ -1107,14 +1103,12 @@ public String getEmployeeList(Model model){
 
 ```html
 <script type="text/javascript" th:src="@{/static/js/vue.js}"></script>
-1
 ```
 
 删除超链接
 
 ```html
 <a class="deleteA" @click="deleteEmployee" th:href="@{'/employee/'+${employee.id}}">delete</a>
-1
 ```
 
 通过vue处理点击事件
@@ -1138,7 +1132,6 @@ public String getEmployeeList(Model model){
         }
     });
 </script>
-123456789101112131415161718
 ```
 
 ##### c>控制器方法
@@ -1149,7 +1142,6 @@ public String deleteEmployee(@PathVariable("id") Integer id){
     employeeDao.delete(id);
     return "redirect:/employee";
 }
-12345
 ```
 
 ### 6、具体功能：跳转到添加数据页面
@@ -1158,7 +1150,6 @@ public String deleteEmployee(@PathVariable("id") Integer id){
 
 ```xml
 <mvc:view-controller path="/toAdd" view-name="employee_add"></mvc:view-controller>
-1
 ```
 
 ##### b>创建employee_add.html
@@ -1182,7 +1173,6 @@ public String deleteEmployee(@PathVariable("id") Integer id){
 
 </body>
 </html>
-123456789101112131415161718
 ```
 
 ### 7、具体功能：执行保存
@@ -1195,7 +1185,6 @@ public String addEmployee(Employee employee){
     employeeDao.save(employee);
     return "redirect:/employee";
 }
-12345
 ```
 
 ### 8、具体功能：跳转到更新数据页面
@@ -1216,7 +1205,6 @@ public String getEmployeeById(@PathVariable("id") Integer id, Model model){
     model.addAttribute("employee", employee);
     return "employee_update";
 }
-123456
 ```
 
 ##### c>创建employee_update.html
@@ -1246,7 +1234,6 @@ public String getEmployeeById(@PathVariable("id") Integer id, Model model){
 
 </body>
 </html>
-123456789101112131415161718192021222324
 ```
 
 ### 9、具体功能：执行更新
@@ -1286,7 +1273,6 @@ public String testRequestBody(@RequestBody String requestBody){
     System.out.println("requestBody:"+requestBody);
     return "success";
 }
-12345
 ```
 
 输出结果：
@@ -1304,7 +1290,6 @@ public String testRequestEntity(RequestEntity<String> requestEntity){
     System.out.println("requestBody:"+requestEntity.getBody());
     return "success";
 }
-123456
 ```
 
 输出结果：
@@ -1321,7 +1306,6 @@ requestBody:username=admin&password=123
 public String testResponseBody(){
     return "success";
 }
-12345
 ```
 
 结果：浏览器页面显示success
@@ -1338,14 +1322,12 @@ a>导入jackson的依赖
     <artifactId>jackson-databind</artifactId>
     <version>2.12.1</version>
 </dependency>
-12345
 ```
 
 b>在SpringMVC的核心配置文件中开启mvc的注解驱动，此时在HandlerAdaptor中会自动装配一个消息转换器：MappingJackson2HttpMessageConverter，可以将响应到浏览器的Java对象转换为Json格式的字符串
 
 ```
 <mvc:annotation-driven />
-1
 ```
 
 c>在处理器方法上使用@ResponseBody注解进行标识
@@ -1358,7 +1340,6 @@ d>将Java对象直接作为控制器方法的返回值返回，就会自动转�
 public User testResponseUser(){
     return new User(1001,"admin","123456",23,"男");
 }
-12345
 ```
 
 浏览器的页面中展示的结果：
@@ -1373,7 +1354,6 @@ a>请求超链接：
 <div id="app">
 	<a th:href="@{/testAjax}" @click="testAjax">testAjax</a><br>
 </div>
-123
 ```
 
 b>通过vue和axios处理点击事件：
@@ -1401,7 +1381,6 @@ b>通过vue和axios处理点击事件：
         }
     });
 </script>
-12345678910111213141516171819202122
 ```
 
 c>控制器方法：
@@ -1413,7 +1392,6 @@ public String testAjax(String username, String password){
     System.out.println("username:"+username+",password:"+password);
     return "hello,ajax";
 }
-123456
 ```
 
 ### 6、@RestController注解
@@ -1455,7 +1433,6 @@ public ResponseEntity<byte[]> testResponseEntity(HttpSession session) throws IOE
     is.close();
     return responseEntity;
 }
-123456789101112131415161718192021222324
 ```
 
 ### 2、文件上传
@@ -1475,7 +1452,6 @@ a>添加依赖：
     <artifactId>commons-fileupload</artifactId>
     <version>1.3.1</version>
 </dependency>
-123456
 ```
 
 b>在SpringMVC的配置文件中添加配置：
@@ -1483,7 +1459,6 @@ b>在SpringMVC的配置文件中添加配置：
 ```xml
 <!--必须通过文件解析器的解析才能将文件转换为MultipartFile对象-->
 <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"></bean>
-12
 ```
 
 c>控制器方法：
@@ -1508,7 +1483,6 @@ public String testUp(MultipartFile photo, HttpSession session) throws IOExceptio
     photo.transferTo(new File(finalPath));
     return "success";
 }
-12345678910111213141516171819
 ```
 
 ## 十一、拦截器
@@ -1533,7 +1507,6 @@ SpringMVC的拦截器必须在SpringMVC的配置文件中进行配置：
 <!-- 
 	以上配置方式可以通过ref或bean标签设置拦截器，通过mvc:mapping设置需要拦截的请求，通过mvc:exclude-mapping设置需要排除的请求，即不需要拦截的请求
 -->
-1234567891011
 ```
 
 ### 2、拦截器的三个抽象方法
@@ -1584,7 +1557,6 @@ SpringMVC提供了自定义的异常处理器SimpleMappingExceptionResolver，�
     -->
     <property name="exceptionAttribute" value="ex"></property>
 </bean>
-123456789101112131415
 ```
 
 ### 2、基于注解的异常处理
@@ -1603,7 +1575,6 @@ public class ExceptionController {
     }
 
 }
-12345678910111213
 ```
 
 ## 十三、注解配置SpringMVC
@@ -1658,7 +1629,6 @@ public class WebInit extends AbstractAnnotationConfigDispatcherServletInitialize
         return new Filter[]{encodingFilter, hiddenHttpMethodFilter};
     }
 }
-123456789101112131415161718192021222324252627282930313233343536373839404142
 ```
 
 ### 2、创建SpringConfig配置类，代替spring的配置文件
@@ -1668,7 +1638,6 @@ public class WebInit extends AbstractAnnotationConfigDispatcherServletInitialize
 public class SpringConfig {
 	//ssm整合之后，spring的配置信息写在此类中
 }
-1234
 ```
 
 ### 3、创建WebConfig配置类，代替SpringMVC的配置文件
@@ -1753,7 +1722,6 @@ public class WebConfig implements WebMvcConfigurer {
 
 
 }
-12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879
 ```
 
 ### 4、测试功能
