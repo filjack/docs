@@ -56,6 +56,7 @@ module.exports = {
       '/tools/': [
         '',
         'UML',
+        'maven',
       ],
       '/sql/': [
         '',
