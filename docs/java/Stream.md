@@ -121,6 +121,36 @@ public class AppTest {
 }
 ```
 
+或者用于将一个多重嵌套集合摊平，比如二维List转换为一维List
+
+```java
+public class FlatMapTest {
+
+    public static void main(String[] args) {
+        List<Integer> list1 = new ArrayList<Integer>() {{
+            add(1);
+            add(2);
+        }};
+        List<Integer> list2 = new ArrayList<Integer>() {{
+            add(3);
+            add(4);
+        }};
+
+        List<List<Integer>> list = new ArrayList<>();
+        list.add(list1);
+        list.add(list2);
+
+        List<Integer> result = list.stream().flatMap(List::stream).collect(Collectors.toList());
+        for (Integer e : result) {
+            System.out.println(e);
+        }
+    }
+
+}
+```
+
+
+
 #### `limit(long n)`
 
 该方法截取前n个元素后结束，如果传入流的元素的个数小于n，那么就提前结束。
