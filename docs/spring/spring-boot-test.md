@@ -4,7 +4,7 @@
 
 ### 2.2版本之前
 
-2.2版本之前，类上需要标注`@SpringBootTest`、`@RunWith(SpringRunner.class)`注解，在测试方法上需要使用`junit`的`@Test`注解。
+2.2版本之前，类上需要标注`@SpringBootTest`、`@RunWith(SpringRunner.class)`注解，在测试方法上需要使用`junit`的`@Test`注解。且测试类需要与项目启动类的路径一致（指的是全限定路径）
 
 ```java
 import org.junit.Test;
@@ -66,3 +66,7 @@ public class ApplicationTest {
 }
 ```
 
+## 常用注解使用
+
+- `@ActiveProfiles("cs")`
+  该注解用来声明测试类启用哪一个配置文件，常用于有多个配置文件的项目中，其中value属性标注所要使用的配置文件的后缀

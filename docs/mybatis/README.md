@@ -121,7 +121,7 @@ public interface SysUserMapper {
 
 
 
-## 缓存
+## [缓存](./Mybatis缓存.md)
 
 ### 实现方式
 
@@ -405,6 +405,12 @@ public interface SysUserMapper {
      ```
 
      
+
+### @Flush
+
+当SqlSession执行器类型为批处理类型时，可以通过该注解执行一个方法，方法的返回值为`List<BatchResult>`，来刷新当前已经执行的更新语句（其实并未真正执行到数据库中），使其真正执行到数据库中区。
+
+也可以通过调用`SqlSession#flushStatements`方法
 
 ## Provider使用
 
@@ -1126,7 +1132,8 @@ public class SysRole {
        }
    ```
 
-   
+
+## [拦截器](./Mybatis拦截器.md) 
 
 ## 使用注意
 
@@ -1175,6 +1182,8 @@ public class SysRole {
    - 当未配置id属性，会根据配置的所有列是否相同来进行比较，都相同则进行合并
 
    当未配置id时，如果有很多个字段，且根据条件能查出来很多条，则要比较乘积次，所以，使用这种嵌套查询时，建议配置id标签。
+   
+7. 由于Mybatis对于**命名空间 +方法名（XML中的id属性值）**是唯一的，所以，禁止同时在接口中和XML中编写（使用注解的）方法名和XML中的id相同的方法
 
 ## 使用问题
 

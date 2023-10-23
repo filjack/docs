@@ -526,3 +526,11 @@ Default 生命周期中有 compile 和 test-compile 两个和编译相关的环�
     - 镜像仓库：内容和中央仓库保持一致，但是能够分担中央仓库的负载，同时让用户能够就近访问提高下载速度，例如：Nexus aliyun
 
 建议：不要中央仓库和阿里云镜像混用，否则 jar 包来源不纯，彼此冲突。
+
+## 常用命令
+
+### 下载source资源包
+
+```cmd
+mvn dependency:resolve -Dclassifier=sources
+```
