@@ -254,3 +254,229 @@ public MultipartResolver multipartResolver(MultipartResolver resolver) {
 
 `WebMvcAutoConfiguration`配置了`HiddenHttpMethodFilter`用来支持表单增加额外参数来发送除了GET、POST外其他请求方式的请求。
 
+#### 请求映射
+
+> 根据Servlet可知，springMVC一定会重写doGet、doPost方法，由源码可知，这两个方法都调用了**DispatcherServlet**中的doService方法，该方法调用本类的**`doDispatch`**方法。
+
+##### DispatcherServlet
+
+主要分发方法为
+
+```java
+mappedHandler = getHandler(processedRequest);
+```
+
+`getHandler()`为request分发到对应的处理器中。在容器启动时，spring默认为我们注入了5个`handlerMapping`
+
+- RequestMappingHandlerMapping
+  包含了所有的controller上标注了RequestMapping的url路径
+- WelcomePageHandlerMapping
+- BeanNameUrlHandlerMapping
+- RouterFunctionMapping
+- SimpleUrlHandlerMapping
+
+当请求进来后，挨个尝试所有的handlerMapping看是否有对应的请求处理器（根据一定的规则，一般顺序是请求方式、请求参数、请求头。。。。）
+
+#### 请求参数
+
+1. 路径参数`@PathVariable`
+   ```java
+       @GetMapping("/car/{id}/owner/{name}")
+       public Map<String, Object> getCar(@PathVariable(value = "id") String id, @PathVariable(value = "name") String name, @PathVariable Map<String, String> map) {
+           Map<String, Object> result = new HashMap<>();
+           result.put("id", id);
+           result.put("name", name);
+           result.put("map", map);
+           return result;
+       }
+   ```
+
+   可以使用`Map<String,String>`来一次性接收所有路径参数
+
+2. 请求头`@RequestHeader`
+   ```java
+       @GetMapping("/car/{id}/owner/{name}")
+       public Map<String, Object> getCar(
+                                         @RequestHeader(value = "User-Agent") String userAgent,
+                                         @RequestHeader Map<String, String> headers) {
+           Map<String, Object> result = new HashMap<>();
+           result.put("User-Agent", userAgent);
+           result.put("headers", headers);
+           return result;
+       }
+   ```
+
+3. 请求参数`@RequestParam`
+   ```java
+       @GetMapping("/car/{id}/owner/{name}")
+       public Map<String, Object> getCar(
+                                         @RequestParam(value = "age") Integer age,
+                                         @RequestParam(value = "interests") List<String> interests) {
+           Map<String, Object> result = new HashMap<>();
+           result.put("age", age);
+           result.put("interests", interests);
+           return result;
+       }
+   ```
+
+4. cookie，`@CookieValue`
+   ```java
+       @GetMapping("/car/{id}/owner/{name}")
+       public Map<String, Object> getCar(
+                                         @CookieValue(value = "_ga") String ga,
+                                         @CookieValue(value = "_ga") Cookie cookie,
+                                         HttpServletResponse response) {
+           response.addCookie(new Cookie("_ga", "zxcvbnm"));
+           Map<String, Object> result = new HashMap<>();
+           System.out.println(ga);
+           System.out.println(cookie.toString());
+           return result;
+       }
+   ```
+
+5. 请求体 `@RequestBody`
+   ```java
+       @PostMapping(value = "/save")
+       public Map postMethod(@RequestBody String content) {
+           Map<String, Object> map = new HashMap<>();
+           map.put("content", content);
+           return map;
+       }
+   ```
+
+   ```html
+       <form action="/save" method="post">
+           测试@RequestBody获取数据<br/>
+           用户：<input name="userName"/><br>
+           邮箱：<input name="email"/><br>
+           <input type="submit" value="提交">
+       </form>
+   ```
+
+6. `@RequestAttribute`
+
+   ```java
+   @Controller
+   public class RequestAttributeController {
+   
+   
+       @GetMapping("/goto")
+       public String requestGoTo(HttpServletRequest request) {
+           request.setAttribute("goto", "跳转。。。。");
+           return "forward:/success";
+       }
+   
+       @ResponseBody
+       @GetMapping("/success")
+       public String success(@RequestAttribute(value = "goto") String att, HttpServletRequest request) {
+           System.out.println(request.getAttribute("goto"));
+           System.out.println(att);
+           return att;
+       }
+   
+   }
+   ```
+
+7. 矩阵变量，`@MatrixVariable`，通过请求路径上的额外参数（以分号隔开）来传递额外信息
+   ```java
+   //    cars/sell;byd=18;lbjn=99
+       @GetMapping(path = "/cars/{path}")
+       public Map<String, Object> getCars(@PathVariable(value = "path") String path,
+                                          @MatrixVariable(value = "byd") Integer bydPrice,
+                                          @MatrixVariable(value = "lbjn") Integer lbjnPrice) {
+           Map<String, Object> map = new HashMap<>();
+           map.put("path", path);
+           map.put("byd", bydPrice);
+           map.put("lbjn", lbjnPrice);
+           return map;
+       }
+   ```
+
+   ```jav
+       //    /boss/sell;yiqi=10,11,12,13;tsl=25
+       @GetMapping(value = "/boss/{path}")
+       public Map<String, Object> getCars2(@PathVariable("path") String path,
+                                           @MatrixVariable(value = "yiqi") List<Integer> yiqi,
+                                           @MatrixVariable(value = "tsl") Integer tsl) {
+           Map<String, Object> map = new HashMap<>();
+           map.put("path", path);
+           map.put("yiqi", yiqi);
+           map.put("tsl", tsl);
+           return map;
+       }
+   ```
+
+   ```java
+   //    /manage/sell;yiqi=10/path;yiqi=20/boss;tsl=90
+       @GetMapping(value = "/manage/{path}/{path2}/{path3}")
+       public Map<String, Object> getCars3(@PathVariable("path") String path,
+                                           @PathVariable("path2") String path2,
+                                           @PathVariable("path3") String path3,
+                                           @MatrixVariable(value = "yiqi", pathVar = "path") Integer yiqi,
+                                           @MatrixVariable(value = "yiqi", pathVar = "path2") Integer yiqi2,
+                                           @MatrixVariable(value = "tsl", pathVar = "path3") Integer tsl) {
+           Map<String, Object> map = new HashMap<>();
+           map.put("path", path);
+           map.put("path2", path2);
+           map.put("yiqi", yiqi);
+           map.put("yiqi2", yiqi2);
+           map.put("tsl", tsl);
+           return map;
+       }
+   ```
+
+   由于SpringBoot默认没有启用矩阵变量，所以需要个性化配置
+   ```java
+       @Bean
+       public WebMvcConfigurer webMvcConfigurer() {
+           return new WebMvcConfigurer() {
+               @Override
+               public void configurePathMatch(PathMatchConfigurer configurer) {
+                   UrlPathHelper urlPathHelper = new UrlPathHelper();
+                   urlPathHelper.setRemoveSemicolonContent(false);
+                   configurer.setUrlPathHelper(urlPathHelper);
+               }
+           };
+       }
+   ```
+
+#### 请求参数处理原理
+
+1. HandlerMapping中找到能够处理当前请求的handler
+
+2. 为当前handler找到一个适配器handlerAdapter
+   ```java
+   // Actually invoke the handler.
+   //DispatcherServlet -- doDispatch
+   mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+   ```
+
+   
+
+3. 适配器执行目标方法并确定方法参数的每一个值
+   ```java
+   mav = invokeHandlerMethod(request, response, handlerMethod); //执行目标方法
+   
+   
+   //ServletInvocableHandlerMethod
+   Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);
+   //获取方法的参数值
+   Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
+   ```
+
+4. 通过遍历参数解析器，找到一个能够处理当前参数情况的解析器并处理参数（根据参数注解）`HandlerMethodArgumentResolver`
+   ```java
+   public interface HandlerMethodArgumentResolver {
+   	// 是否支持处理当前参数
+   	boolean supportsParameter(MethodParameter parameter);
+   
+       // 解析当前参数
+   	@Nullable
+   	Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+   			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception;
+   
+   }
+   ```
+
+   
+

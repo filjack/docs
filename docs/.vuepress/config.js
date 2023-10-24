@@ -22,6 +22,10 @@ module.exports = {
         link: '/spring/'
       },
       {
+        text: 'MYBATIS',
+        link: '/mybatis/'
+      },
+      {
         text: '操作系统',
         link: '/os/'
       },
@@ -52,7 +56,17 @@ module.exports = {
         'AOP',
         'Transaction',
         'springMVC',
+        'spring-boot-test',
+        'spring-boot',
+        'Spring项目常用注解',
+        '参数校验注解'
       ],
+      '/mybatis/': [
+        '',
+        'Mybatis缓存',
+        'Mybatis拦截器'
+      ]
+      ,
       '/tools/': [
         '',
         'UML',
@@ -148,7 +162,8 @@ module.exports = {
       ],
       '/ds/': [
         '',
-        '数组和字符串'
+        '数组和字符串',
+        '链表'
       ],
       '/dp/': [
         '',
