@@ -49,8 +49,16 @@ public class CustomConfig {
 
 ## Spring WEB MVC
 
-@ResponseBody
+### `@ResponseBody`
 
-@RestController
+### `@RestController`
+
+### `@ModelAttribute`
+
+用在方法或方法参数上，
+
+### `@SessionAttributes`
+
+用在类上（一般是标注了`@RequestMapping`的类），注解的值列出了该类中即将要放入model中的数据会在当前会话完成之前一直存在。当程序指示当前会话结束后会被移除。
 
 ## Spring Boot

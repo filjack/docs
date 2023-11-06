@@ -1,6 +1,7 @@
 // const path = require("path")
 module.exports = {
   base: '/',
+  port: 9999,
   title: 'NOTE',
   description: 'NOTE',
   themeConfig: {
@@ -59,7 +60,8 @@ module.exports = {
         'spring-boot-test',
         'spring-boot',
         'Spring项目常用注解',
-        '参数校验注解'
+        '参数校验注解',
+        '使用问题',
       ],
       '/mybatis/': [
         '',

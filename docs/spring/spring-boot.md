@@ -1,5 +1,7 @@
 # SpringBoot
 
+所谓应用程序，就是有许多组件构成，每个组件承担一部分责任，相互协作，完成程序的整套流程。
+
 - 优点
   1. 能够创建独立的Spring应用
   2. 内嵌了web服务器
@@ -14,6 +16,8 @@
 ## [微服务](https://martinfowler.com/microservices/) 
 
 ## 依赖管理
+
+> spring-boot为所有为所有“场景”都规划好了该场景下可能会用到的依赖的版本，我们只需要引入场景依赖（starter依赖）即可
 
 - 父项目做依赖管理，父依赖POM声明了几乎所有项目开发过程可能会用到的依赖的版本，基于此来做到依赖版本自动仲裁机制
 
@@ -143,7 +147,10 @@
 - `@Bean`
   一般用于`@Configuration`注解中，且，当声明多个`@Bean`时，注入顺序和声明顺序相同，可以通过`@DependsOn`来改变注入顺序
 
-- `@Controller`、`@Service`、`@Repository`、`@Component`、`@ComponentScan`
+- `@Controller`
+  控制器类，用来处理请求并以某种方式进行信息相应。
+
+- `@Service`、`@Repository`、`@Component`、`@ComponentScan`
 
 - `@Import`，导入一系列组件到容器中
 
@@ -176,6 +183,21 @@
       }
   }
   ```
+  
+- `@Profile()`
+  根据激活的yaml配置文件的不同来注入不同的组件，属性值为激活yaml文件的后缀
+
+  ```java
+  @Configuration(proxyBeanMethods = false)
+  @Profile("production")
+  public class ProductionConfiguration {
+  
+      // ...
+  
+  }
+  ```
+
+  
 
 ### 原生配置XML导入
 
@@ -392,7 +414,7 @@ mappedHandler = getHandler(processedRequest);
        }
    ```
 
-   ```jav
+   ```java
        //    /boss/sell;yiqi=10,11,12,13;tsl=25
        @GetMapping(value = "/boss/{path}")
        public Map<String, Object> getCars2(@PathVariable("path") String path,
@@ -419,7 +441,7 @@ mappedHandler = getHandler(processedRequest);
            map.put("path", path);
            map.put("path2", path2);
            map.put("yiqi", yiqi);
-           map.put("yiqi2", yiqi2);
+           map.put("yiqi2", yiqi2);     
            map.put("tsl", tsl);
            return map;
        }
@@ -440,9 +462,94 @@ mappedHandler = getHandler(processedRequest);
        }
    ```
 
-#### 请求参数处理原理
+8. Servlet API请求参数
+
+   例如：`WebRequest、ServletRequest、MultipartRequest、 HttpSession、javax.servlet.http.PushBuilder、Principal、InputStream、Reader、HttpMethod、Locale、TimeZone、ZoneId`。都会在**ServletRequestMethodArgumentResolver** 中进行解析。
+
+9. 复杂参数
+
+   1. `Map、Model、HttpServletRequest`，在这些对象中（请求参数）中放数据，都相当于在request中放数据
+
+      ```java
+      @Controller
+      public class RequestAttributeController {
+      
+      
+          @GetMapping("/goto")
+          public String requestGoTo(HttpServletRequest request,
+                                    Map<String, Object> map,
+                                    Model model,
+                                    HttpServletResponse response) {
+              request.setAttribute("goto", "跳转。。。。");
+              map.put("map", "map");
+              model.addAttribute("model", "model");
+              Cookie cookie = new Cookie("cookie", "cookie");
+              response.addCookie(cookie);
+              return "forward:/success";
+          }
+      
+          @ResponseBody
+          @GetMapping("/success")
+          public Map<String, Object> success(@RequestAttribute(value = "goto") String att,
+                                             HttpServletRequest request) {
+              Map<String, Object> map = new HashMap<>();
+              map.put("map", request.getAttribute("map"));
+              map.put("model", request.getAttribute("model"));
+              map.put("goto", request.getAttribute("goto"));
+              for (Cookie cookie : request.getCookies()) {
+                  map.put(cookie.getName(), cookie.getValue());
+              }
+              return map;
+          }
+      
+      }
+      ```
+
+   2. POJO请求参数自动绑定
+
+      1. 由`ServletModelAttributeMethodProcesor`处理器支持，内部判断是否为简单类型（内置的一些类型）
+         ```java
+         public static boolean isSimpleValueType(Class<?> type) {
+         		return (Void.class != type && void.class != type &&
+         				(ClassUtils.isPrimitiveOrWrapper(type) ||
+         				Enum.class.isAssignableFrom(type) ||
+         				CharSequence.class.isAssignableFrom(type) ||
+         				Number.class.isAssignableFrom(type) ||
+         				Date.class.isAssignableFrom(type) ||
+         				Temporal.class.isAssignableFrom(type) ||
+         				URI.class == type ||
+         				URL.class == type ||
+         				Locale.class == type ||
+         				Class.class == type));
+         	}
+         ```
+
+      2. 在处理类型转换时，由`WebDataBinder`数据绑定器，来做数据的类型转换（利用内部的`Converters`，位于`ConversionService`中）与绑定
+      
+      3. 重定向参数 `RedirectAttributes`，当需要重定向到某个页面或请求需要带参数时使用。
+         ```java
+             @GetMapping("/user/delete/{id}")
+             public String deleteUser(@PathVariable("id") Long id,
+                                      @RequestParam(value = "pn",defaultValue = "1")Integer pn,
+                                      RedirectAttributes ra){
+         
+                 userService.removeById(id);
+         
+                 ra.addAttribute("pn",pn);
+                 return "redirect:/dynamic_table";
+             }
+         ```
+      
+         
+
+#### 请求参数处理流程
 
 1. HandlerMapping中找到能够处理当前请求的handler
+   ```java
+   mappedHandler = getHandler(processedRequest);
+   ```
+
+   
 
 2. 为当前handler找到一个适配器handlerAdapter
    ```java
@@ -478,5 +585,239 @@ mappedHandler = getHandler(processedRequest);
    }
    ```
 
+   在处理类型转换时，由`WebDataBinder`数据绑定器，来做数据的类型转换（利用内部的`Converters`，位于`ConversionService`中）与绑定
    
+5. 将所有的数据都放在 **ModelAndViewContainer**；包含要去的页面地址View。还包含Model数据。
 
+6. 通过`ModelAndViewContainer`组装`ModelAndView`并返回给`DisPatcherServlet`做后续处理
+
+#### 响应数据
+
+1. `@REsponseBody`，配合json依赖，返回前端json数据。通过`RequestResponseBodyMethodProcessor`类进行处理。
+
+   ```java
+       	@Override
+   	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
+   			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
+   			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
+   
+   		mavContainer.setRequestHandled(true);
+   		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
+   		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
+   
+           // 使用消息转换器进行写出从操作
+   		// Try even with null return value. ResponseBodyAdvice could get involved.
+   		writeWithMessageConverters(returnValue, returnType, inputMessage, outputMessage);
+   	}
+   ```
+
+#### 返回值解析器处理流程
+
+1. 返回值处理器判断是否支持这种类型返回值 supportsReturnType
+
+2. 返回值处理器调用 handleReturnValue 进行处理
+
+3. RequestResponseBodyMethodProcessor 可以处理返回值标了@ResponseBody 注解的。
+
+   1. 利用 MessageConverters 进行处理，将数据写为json
+
+      1. 内容协商（浏览器默认会以请求头的方式告诉服务器他能接受什么样的内容类型）
+
+         1. 获取浏览器发来的请求头`Accept`可接受的返回类型信息
+            通过**contentNegotiationManager 内容协商管理器** 获取
+
+         ```yaml
+         Accept: */*
+         ```
+
+         2. 遍历循环所有当前系统的 **MessageConverter**，甄别出可以处理当前返回对象的转换器，并统计出这些转换器支持的媒体类型
+         3. 将浏览器接受的返回类型与服务器能够提供的返回类型进行最佳匹配
+         4. 使用匹配上的转换器处理当前返回对象
+
+      2. 服务器最终根据自己自身的能力，决定服务器能生产出什么样内容类型的数据，
+
+      3. SpringMVC会挨个遍历所有容器底层的 HttpMessageConverter ，看谁能处理（判断该转换器能够将当前返回类型转换成内容协商之后得到的最佳匹配返回类型）
+
+         1. 得到MappingJackson2HttpMessageConverter可以将对象写为json
+         2. 利用MappingJackson2HttpMessageConverter将对象转为json再写出去。
+
+
+
+
+
+#### 内容协商
+
+内容协商策略通过配置文件配置
+
+```yam
+spring:
+    contentnegotiation:
+      favor-parameter: true
+```
+
+此时请求url带上format参数即可，format参数取值范围为`{json,xml}`
+
+```yaml
+GET http://localhost:8888/user2?format=json
+Accept: application/xml
+```
+
+上述请求优先以json格式返回
+
+#### 异常处理
+
+执行目标方法，目标方法运行期间有任何异常都会被catch、而且标志当前请求结束；并且用 **dispatchException** 
+
+2、进入视图解析流程（页面渲染？） 
+
+processDispatchResult(processedRequest, response, mappedHandler, **mv**, **dispatchException**);
+
+3、**mv** = **processHandlerException**；处理handler发生的异常，处理完成返回ModelAndView；
+
+- 1、遍历所有的 **handlerExceptionResolvers，看谁能处理当前异常【**HandlerExceptionResolver处理器异常解析器】
+- **2、系统默认的  异常解析器；**
+  1. DefaultErrorAttributes先来处理异常。把异常信息保存到rrequest域，并且返回null；
+  2. 默认没有任何人能处理异常，所以异常会被抛出
+     1. 如果没有任何人能处理最终底层就会发送 /error 请求。会被底层的BasicErrorController处理
+     2. 解析错误视图；遍历所有的**ErrorViewResolver  看谁能解析。** 
+     3. 默认的 **DefaultErrorViewResolver ,作用是把响应状态码作为错误页的地址，error/500.html** 
+     4. 模板引擎最终响应这个页面 **error/500.html** 
+
+注意：Spring自动发出的`/error`请求时内嵌入的tomcat服务器底层封装的**response**来发送的，请求路径是由spring容器覆写的，可以通过yaml文件配置
+```java
+// org.apache.catalina.core.StandardHostValve
+private void status(Request request, Response response) {
+
+        int statusCode = response.getStatus();
+
+        // Handle a custom error page for this status code
+        Context context = request.getContext();
+        if (context == null) {
+            return;
+        }
+
+        /* Only look for error pages when isError() is set.
+         * isError() is set when response.sendError() is invoked. This
+         * allows custom error pages without relying on default from
+         * web.xml.
+         */
+        if (!response.isError()) {
+            return;
+        }
+
+        ErrorPage errorPage = context.findErrorPage(statusCode);
+        if (errorPage == null) {
+            // Look for a default error page
+            errorPage = context.findErrorPage(0);
+        }
+        if (errorPage != null && response.isErrorReportRequired()) {
+            response.setAppCommitted(false);
+            request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE,
+                              Integer.valueOf(statusCode));
+
+            String message = response.getMessage();
+            if (message == null) {
+                message = "";
+            }
+            request.setAttribute(RequestDispatcher.ERROR_MESSAGE, message);
+            request.setAttribute(Globals.DISPATCHER_REQUEST_PATH_ATTR,
+                    errorPage.getLocation());
+            request.setAttribute(Globals.DISPATCHER_TYPE_ATTR,
+                    DispatcherType.ERROR);
+
+
+            Wrapper wrapper = request.getWrapper();
+            if (wrapper != null) {
+                request.setAttribute(RequestDispatcher.ERROR_SERVLET_NAME,
+                                  wrapper.getName());
+            }
+            request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI,
+                                 request.getRequestURI());
+            if (custom(request, response, errorPage)) {
+                response.setErrorReported();
+                try {
+                    response.finishResponse();
+                } catch (ClientAbortException e) {
+                    // Ignore
+                } catch (IOException e) {
+                    container.getLogger().warn("Exception Processing " + errorPage, e);
+                }
+            }
+        }
+    }
+
+```
+
+#### `DisPatcherServlet`的注册
+
+- 容器中自动配置了`DispatcherServlet`的bean，并且默认的配置类绑定到 `WebMvcProperties`配置类上。
+- 容器自动配置了 `DispatcherServletRegistrationBean`类，该类实现了 `ServletRegistrationBean`，通过该注册类，容器将上面注册的`dispatcherServlet` bean，以及默认配置的该`Servlet`的处理路径（映射路径）`/` 配置进容器中
+
+> `Tomcat Servlet`：
+>
+> 当由Tomcat统一管理的多个配置好的Servlet都能处理到同一路径时，此时执行精确优先原则，例如
+>
+> AServlet能够处理 `/my`路径
+>
+> BServlet能够处理 `/my/1`路径
+>
+> 当请求路径为 `/my/1`时，匹配到BServlet进行处理，而当请求路径为 `/my/2`时，匹配到AServlet进行处理。
+
+
+
+#### 嵌入式Servlet容器
+
+> `ServletWebServerApplicationContext` 容器启动寻找`ServletWebServerFactory` 并引导创建服务器
+
+默认支持的`WebServer`
+
+- Tomcat
+- Jetty
+- Undertow
+
+原理
+
+- SpringBoot应用启动发现当前是Web应用。web场景包-导入tomcat
+- web应用会创建一个web版的ioc容器 `ServletWebServerApplicationContext` 
+- `ServletWebServerApplicationContext` 启动的时候寻找 `ServletWebServerFactory（Servlet 的web服务器工厂---> Servlet 的web服务器）` 
+- SpringBoot底层默认有很多的WebServer工厂；`TomcatServletWebServerFactory`, `JettyServletWebServerFactory`, or `UndertowServletWebServerFactory`
+- `底层直接会有一个自动配置类。ServletWebServerFactoryAutoConfiguration`
+- `ServletWebServerFactoryAutoConfiguration导入了ServletWebServerFactoryConfiguration（配置类）`
+- `ServletWebServerFactoryConfiguration 配置类 根据动态判断系统中到底导入了那个Web服务器的包。（默认是web-starter导入tomcat包），容器中就有 TomcatServletWebServerFactory`
+- `TomcatServletWebServerFactory 创建出Tomcat服务器并启动；TomcatWebServer 的构造器拥有初始化方法initialize---this.tomcat.start();`
+- `内嵌服务器，就是手动把启动服务器的代码调用（tomcat核心jar包存在）`
+
+#### 定制化原理
+
+##### 1、定制化的常见方式 
+
+- 修改配置文件；
+- **xxxxxCustomizer；**
+- **编写自定义的配置类   xxxConfiguration；+** **@Bean替换、增加容器中默认组件；例如视图解析器** 
+- **Web应用 编写一个配置类实现** **WebMvcConfigurer 即可定制化web功能；+ @Bean给容器中再扩展一些组件**
+
+```java
+@Configuration
+public class AdminWebConfig implements WebMvcConfigurer
+```
+
+- @EnableWebMvc + WebMvcConfigurer —— @Bean  可以全面接管SpringMVC，所有规则全部自己重新配置； 实现定制和扩展功能
+
+原理
+
+- 1、`WebMvcAutoConfiguration`  默认的`SpringMVC`的自动配置功能类。静态资源、欢迎页.....
+- 2、一旦使用 `@EnableWebMvc` 。会 `@Import(DelegatingWebMvcConfiguration.class)`
+- 3、`DelegatingWebMvcConfiguration` 的 作用，只保证SpringMVC最基本的使用
+
+- 把所有系统中的 `WebMvcConfigurer` 拿过来。所有功能的定制都是这些 WebMvcConfigurer  合起来一起生效
+- 自动配置了一些非常底层的组件。`RequestMappingHandlerMapping`、这些组件依赖的组件都是从容器中获取
+- **public class** DelegatingWebMvcConfiguration **extends** **WebMvcConfigurationSupport**
+
+- 4、**WebMvcAutoConfiguration** 里面的配置要能生效 必须  @ConditionalOnMissingBean(**WebMvcConfigurationSupport**.**class**)
+- 5、@EnableWebMvc  导致了 **WebMvcAutoConfiguration  没有生效。**
+
+
+
+##### 2、原理分析套路
+
+**场景starter** **- xxxxAutoConfiguration - 导入xxx组件 - 绑定xxxProperties --** **绑定配置文件项** 
