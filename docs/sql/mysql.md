@@ -37,6 +37,24 @@
 
 ## 基本语法
 
+### SQL执行顺序
+
+```sql
+(8) SELECT 
+(9)DISTINCT<Select_list>
+(1) FROM <left_table> 
+(3) <join_type>JOIN<right_table>
+(2) ON<join_condition>
+(4) WHERE<where_condition>
+(5) GROUP BY<group_by_list>
+(6) WITH {CUBE|ROLLUP}
+(7) HAVING<having_condtion>
+(10) ORDER BY<order_by_list>
+(11) LIMIT<limit_number>
+```
+
+
+
 ### 创建表
 
 ```sql
@@ -231,8 +249,6 @@ update products p,customers c set p.prod_name = 'xpf',c.cust_name = 'xpf' where 
 2. 若想删除某个列的值，可以通过设置其为 `null` 。
 
 ### 删除数据
-
-### 
 
 ```sql
 delete from customers where cust_id = 10006;
