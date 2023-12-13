@@ -22,7 +22,6 @@ CREATE TABLE leads (
     email VARCHAR(100),
     phone VARCHAR(25)
 );
-SQL
 ```
 
 因此，`id`是[主键](http://www.yiibai.com/mysql/primary-key.html)列，它不接受任何`NULL`值。
@@ -34,7 +33,6 @@ SQL
 ```sql
 INSERT INTO leads(first_name,last_name,source,email,phone)
 VALUE('John','Doe','Web Search','john.doe@yiibai.com',NULL);
-SQL
 ```
 
 因为`email`列的默认值为`NULL`，可以按照以下方式在`INSERT`语句中省略电子邮件：
@@ -43,7 +41,6 @@ SQL
 INSERT INTO leads(first_name,last_name,source,phone)
 VALUES('Lily','Bush','Cold Calling','(408)-555-1234'),
 ('David','William','Web Search','(408)-888-6789');
-SQL
 ```
 
 ## UPDATE语句中的MySQL SET NULL值
@@ -56,7 +53,6 @@ SET
     phone = NULL
 WHERE
     id = 3;
-SQL
 ```
 
 ## MySQL ORDER BY为NULL
@@ -71,7 +67,6 @@ SELECT
 FROM
     leads
 ORDER BY phone;
-SQL
 ```
 
 执行上面查询语句，结果如下 - 
@@ -84,7 +79,6 @@ SQL
 |  3 | David      | William   | Web Search   | NULL                | NULL           |
 |  2 | Lily       | Bush      | Cold Calling | NULL                | (408)-555-1234 |
 +----+------------+-----------+--------------+---------------------+----------------+
-SQL
 ```
 
 如果使用`ORDER BY DESC`，`NULL`值将显示在结果集的最后。 请参阅以下示例：
@@ -95,7 +89,6 @@ SELECT
 FROM
     leads
 ORDER BY phone DESC;
-SQL
 ```
 
 执行上面查询语句，结果如下 - 
@@ -109,7 +102,6 @@ SQL
 |  3 | David      | William   | Web Search   | NULL                | NULL           |
 +----+------------+-----------+--------------+---------------------+----------------+
 3 rows in set
-SQL
 ```
 
 要在查询中测试`NULL`，可以在[WHERE](http://www.yiibai.com/mysql/where.html)子句中使用`IS NULL`或`IS NOT NULL`运算符。
@@ -123,7 +115,6 @@ FROM
     leads
 WHERE
     phone IS NULL;
-SQL
 ```
 
 执行上面查询语句，结果如下 - 
@@ -136,7 +127,6 @@ SQL
 |  3 | David      | William   | Web Search | NULL                | NULL  |
 +----+------------+-----------+------------+---------------------+-------+
 2 rows in set
-SQL
 ```
 
 可以使用`IS NOT`运算符来获取所有提供电子邮件地址的潜在客户。
@@ -148,7 +138,6 @@ FROM
     leads
 WHERE
     email IS NOT NULL;
-SQL
 ```
 
 执行上面查询语句，结果如下 - 
@@ -160,7 +149,6 @@ SQL
 |  1 | John       | Doe       | Web Search | john.doe@yiibai.com | NULL  |
 +----+------------+-----------+------------+---------------------+-------+
 1 row in set
-SQL
 ```
 
 即使`NULL`不等于`NULL`，`GROUP BY`子句中视两个`NULL`值相等。
@@ -171,7 +159,6 @@ SELECT
 FROM
     leads
 GROUP BY email;
-SQL
 ```
 
 该查询只返回两行，因为其邮箱(`email`)列为`NULL`的行被分组为一行，结果如下所示 - 
@@ -184,7 +171,6 @@ SQL
 | john.doe@yiibai.com |        1 |
 +---------------------+----------+
 2 rows in set
-SQL
 ```
 
 ## MySQL NULL和UNIQUE索引
@@ -195,7 +181,6 @@ SQL
 
 ```sql
 CREATE UNIQUE INDEX idx_phone ON leads(phone);
-SQL
 ```
 
 请注意，如果使用BDB[存储引擎](http://www.yiibai.com/understand-mysql-table-types-innodb-myisam.html)，MySQL认为`NULL`值相等，因此您不能将多个`NULL`值插入到具有唯一约束的列中。
@@ -213,7 +198,6 @@ SELECT
     id, first_name, last_name, IFNULL(phone, 'N/A') phone
 FROM
     leads;
-SQL
 ```
 
 执行上面查询语句，得到以下结果 - 
@@ -227,7 +211,6 @@ SQL
 |  3 | David      | William   | N/A            |
 +----+------------+-----------+----------------+
 3 rows in set
-SQL
 ```
 
 `COALESCE`函数接受参数列表，并返回第一个非`NULL`参数。 例如，可以使用`COALESCE`函数根据信息的优先级按照以下顺序显示线索的联系信息：`phone`, `email`和`N/A`。
@@ -240,7 +223,6 @@ SELECT
     COALESCE(phone, email, 'N/A') contact
 FROM
     leads;
-SQL
 ```
 
 执行上面查询语句，得到以下代码 - 
@@ -254,7 +236,6 @@ SQL
 |  3 | David      | William   | N/A                 |
 +----+------------+-----------+---------------------+
 3 rows in set
-Shell
 ```
 
 `NULLIF`函数接受两个参数。如果两个参数相等，则`NULLIF`函数返回`NULL`。 否则，它返回第一个参数。
@@ -264,7 +245,6 @@ Shell
 ```sql
 INSERT INTO leads(first_name,last_name,source,email,phone)
 VALUE('Thierry','Henry','Web Search','thierry.henry@yiibai.com','');
-SQL
 ```
 
 `phone`是一个空字符串:`''`，而不是`NULL`。
@@ -279,7 +259,6 @@ SELECT
     COALESCE(phone, email, 'N/A') contact
 FROM
     leads;
-SQL
 ```
 
 执行上面查询语句，得到以下代码 - 
@@ -293,7 +272,6 @@ SQL
 |  3 | David      | William   | N/A                 |
 |  4 | Thierry    | Henry     |                     |
 +----+------------+-----------+---------------------+
-Shell
 ```
 
 要解决这个问题，您可以使用`NULLIF`函数将电话与空字符串(`''`)进行比较，如果相等，则返回`NULL`，否则返回电话号码。
@@ -306,7 +284,6 @@ SELECT
     COALESCE(NULLIF(phone, ''), email, 'N/A') contact
 FROM
     leads;
-SQL
 ```
 
 执行上面查询语句，得到以下代码 - 

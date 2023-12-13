@@ -11,7 +11,7 @@
 提交（commit）：指将未存储的 `sql` 语句结果写入数据库表。
 保留点（savepoint）：指事务处理中设置的临时占位符，你可以对他发布回退（与退回整个事务处理不同）。
 
-```mysql
+```sql
 start transaction; # 开始事务，在事务处理块中，提交不回隐含的提交，必须使用commit
 rollback; # 回退，insert update delete
 commit; # 提交事务
@@ -19,12 +19,12 @@ commit; # 提交事务
 
 savepoint delete1; # 放置保留点，应该多多放置保留点
 rollback delete1; # 回退到保留点，在执行完一条rollback或者commit语句后自动释放保留点，也可以使用
-release savepoint # 明确释放
+release savepoint delete1; # 明确释放保存点delete1
 ```
 
 例如：
 
-```mysql
+```sql
 delimiter //
 select * from ordertotals;
 start transaction;
@@ -67,7 +67,7 @@ Query OK, 0 rows affected (0.01 sec)
 
 更改默认提交行为
 
-```mysql
+```sql
 select @@autocommit;
 set @@autocommit = 0; # 不自动提交更改
 set @@autocommit = 1; # 自动提交更改
@@ -76,13 +76,11 @@ set @@autocommit = 1; # 自动提交更改
 
 ## ACID特性
 
+> 原子性、隔离性、持久性是手段，一致性是目的，事务的目的是为了保证一组操作前后数据的一致性。
+
 ### 原子性（Atomicity）
 
 事务是不可分割的最小操作单元，要么全部成功，要么全部失败。
-
-### 一致性（Consistency）
-
-事务完成时，必须使得所有的数据都保持一致状态。（有点类似于能量守恒，从整体上来看是没有变化的）
 
 ### 隔离性（Isolation）
 
@@ -91,6 +89,10 @@ set @@autocommit = 1; # 自动提交更改
 ### 持久性（Durability）
 
 事务一旦提交或回滚，它对数据库中数据的改变就是永久的。
+
+### 一致性（Consistency）
+
+事务完成时，必须使得所有的数据都保持一致状态。（有点类似于能量守恒，从整体上来看是没有变化的）
 
 ## 并发事务问题
 

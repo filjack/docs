@@ -53,7 +53,8 @@
 (11) LIMIT<limit_number>
 ```
 
-
+1. `from`子句是执行的第一步，根据语句后的表进行查询，生成一个虚拟表作为数据源，如果`from`后跟了多个表，则进行笛卡尔积，执行顺序是从后往前，即最后的表作为基础表
+2. 关于`on`与`join`的顺序存在疑虑，因为`on`一般情况下是设置的进行联结的多张表之间的关系，所以是否是先`join`在进行`on`？？
 
 ### 创建表
 
@@ -578,7 +579,7 @@ select vend_id,count(*) num_prods from products group by vend_id;
    select vend_id as id ,count(*) num_prods from products group by id;
    ```
 
-4. `select` 中每个列都必须在 `group by` 中给出，除了聚集函数。
+4. `select` 中每个列都必须在 `group by` 中给出，除了聚集函数，反之，`group by`子句中的每一列不是必须在`select`子句中出现。
 
 5. 对于 `null` ， `group by` 将其视作同一组。
 

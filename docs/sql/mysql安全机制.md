@@ -70,6 +70,9 @@ show grants for ben@localhost;
 ### 授予用户权限（ `grant` ）
 
 ```sql
+grant all on *.* to 'ben'@'localhost'；
+# 授予ben所有权限
+
 grant select on crashcourse.* to ben@localhost; # 赋予ben查询crashcourse库的权限
 
 grant select,update on crashcourse.* to ben@localhost; # 一次授予多个权限
