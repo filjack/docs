@@ -444,7 +444,7 @@ public class PrivilegeProvider {
 
 ### v2.0
 
-使用`SqlSession`通过命名空间调用Mybatis方法，首先需要用到命令空间和方法id组成的字符串来调用相应的方法。当参数多余1个的时候，需要将所有的参数放到一个Map对象中来传递。
+使用`SqlSession`通过命名空间调用Mybatis方法，首先需要用到命令空间和方法id组成的字符串来调用相应的方法。当参数多于1个的时候，需要将所有的参数放到一个Map对象中来传递。
 
 ```xm
 <?xml version="1.0" encoding="UTF-8" ?>

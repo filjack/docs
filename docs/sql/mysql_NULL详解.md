@@ -1,8 +1,8 @@
 # NULL
 
-## MySQL NULL值简介
+## `MySQL` NULL值简介
 
-在MySQL中，`NULL`值表示一个未知值。 `NULL`值不同于`0`或空字符串`''`。
+在`MySQL`中，`NULL`值表示一个未知值。 `NULL`值不同于`0`或空字符串`''`。
 
 `NULL`值不等于它自身。如果将`NULL`值与另一个`NULL`值或任何其他值进行比较，则结果为`NULL`，因为一个不知道是什么的值(`NULL`值)与另一个不知道是什么的值(`NULL`值)比较，其值当然也是一个不知道是什么的值(`NULL`值)。
 
@@ -175,7 +175,7 @@ GROUP BY email;
 
 ## MySQL NULL和UNIQUE索引
 
-在列上使用唯一约束或`UNIQUE`索引时，可以在该列中[插入](http://www.yiibai.com/mysql/insert-statement.html)多个`NULL`值。这是非常好的，因为在这种情况下，MySQL认为`NULL`值是不同的。
+**在列上使用唯一约束或`UNIQUE`索引时，可以在该列中[插入](http://www.yiibai.com/mysql/insert-statement.html)多个`NULL`值。**这是非常好的，因为在这种情况下，MySQL认为`NULL`值是不同的。
 
 我们通过为`phone`列创建一个`UNIQUE`索引来验证这一点。
 
@@ -299,5 +299,3 @@ FROM
 +----+------------+-----------+--------------------------+
 4 rows in set
 ```
-
-//原文出自【易百教程】，商业转载请联系作者获得授权，非商业转载请保留原文链接：https://www.yiibai.com/mysql/null.html 

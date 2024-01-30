@@ -12,3 +12,15 @@
   4. 方便集合其他框架（Mybatis等）
   5. 方便进行事务操作
   6. 降低API开发难度
+
+## 设计理念
+
+- 对于各个应用场景提供不同的解决方案，例如选择持久化支持的依赖方面，可以有不同的选择，而在切换不同依赖的使用上，仅仅只需要更改配置而不是代码
+- 向后兼容
+- 强调代码质量
+
+
+
+<img :src="$withBase='/img/class-extends-chain.png'" class="align-center"/>
+
+![](../.vuepress/public/img/class-extends-chain.png)

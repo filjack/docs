@@ -105,7 +105,10 @@ public class ApplicationTest {
   
   ```
   
-  
+
+## 事务注解
+
+spring-boot-test提供了`@RollBack`和`@Commit`注解在使用了`@Transactional`的测试方法（或测试类）上使用。
 
 ## 常用注解使用
 

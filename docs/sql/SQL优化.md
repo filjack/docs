@@ -1,4 +1,167 @@
-# SQL优化
+# `SQL`优化
+
+## SQL性能分析
+
+### SQL语句执行频次
+
+`SHOW [GLOBAL|SESSION] STATUS` 可以查看服务器的状态信息，`SHOW GLOBAL STATUS LIKE 'Com_______'`可以查看服务器INCERT、UPDATE、DELETE、SELECT语句的频次。
+
+```sql
+SHOW GLOBAL STATUS LIKE 'Com_______';
+```
+
+执行结果
+
+```
+Com_binlog	0
+Com_commit	0
+Com_delete	0
+Com_import	0
+Com_insert	0
+Com_repair	0
+Com_revoke	0
+Com_select	18
+Com_signal	0
+Com_update	0
+Com_xa_end	0
+```
+
+通过观察频次，来确定该数据库主要是哪种语句过多，应该主要哪方面（比如查询）的性能。
+
+### 慢查询日志
+
+该日志记录了所有执行时间超过指定参数（long_query_time，单位秒，默认10秒）的所有SQL语句的日志。
+
+查看是否开启慢查询日志，以及当前默认时间是多少
+
+```sql
+show VARIABLES like 'slow_query_log'
+show VARIABLES like 'long_query_time'
+```
+
+开启慢查询日志，需要在MySQL的配置文件（/etc/my.cnf）中配置如下信息：
+
+```bash
+# 开启慢查询日志
+slow_query_log = 1
+# 设置慢日志的时间为2秒，SQL语句执行时间超过2s，就会被视为慢查询，记录慢查询日志
+long_query_time = 2
+```
+
+一般日志存放位置为 `/var/lib/mysql/localhost-slow.log`
+
+### ~~profile详情~~（`performance_schema`）
+
+查看数据库版本是否支持profile，以及是否开启profile
+
+```sql
+# 查看是否支持profile
+select @@have_profiling;
+# 查看是否开启
+select @@profiling;
+# 开启profile
+set profiling = 1;
+# 关闭profile
+set profiling = 0;
+```
+
+
+
+show profiles 能够在做SQL优化时帮助我们了解时间都耗费到哪里去了。
+
+- 查看每一条SQL的耗时情况
+
+  ```sql
+  show profiles;
+  ```
+
+  结果如下
+
+  | QueryId | Duration   | Query                |
+  | ------- | ---------- | -------------------- |
+  | 92      | 0.00091025 | SHOW STATUS          |
+  | 110     | 0.0002535  | select * from `user` |
+
+- 查看指定QueryId的SQL语句各个阶段的耗时情况
+
+  ```sql
+  show profile for query 110;
+  ```
+
+  结果如下
+
+  | Satus                         | Duration |
+  | ----------------------------- | -------- |
+  | starting                      | 0.000054 |
+  | Executing hook on transaction | 0.000003 |
+  | starting                      | 0.000005 |
+  | checking permissions          | 0.000004 |
+  | Opening tables                | 0.000036 |
+  | init                          | 0.000003 |
+  | System lock                   | 0.000006 |
+  | optimizing                    | 0.000003 |
+  | statistics                    | 0.000011 |
+  | preparing                     | 0.000013 |
+  | executing                     | 0.000043 |
+  | end                           | 0.000002 |
+  | query end                     | 0.000002 |
+  | waiting for handler commit    | 0.000005 |
+  | closing tables                | 0.000005 |
+  | freeing items                 | 0.000054 |
+  | cleaning up                   | 0.000007 |
+
+- 查看指定QueryID的SQL语句的CPU使用情况
+
+  ```sql
+  show profile cpu for query 110;
+  ```
+
+  | Satus                         | Duration | CPU_user | CPU_system |
+  | ----------------------------- | -------- | -------- | ---------- |
+  | starting                      | 0.000054 | 0.000000 | 0.000000   |
+  | Executing hook on transaction | 0.000003 | 0.000000 | 0.000000   |
+  | starting                      | 0.000005 | 0.000000 | 0.000000   |
+  | checking permissions          | 0.000004 | 0.000000 | 0.000000   |
+  | Opening tables                | 0.000036 | 0.000000 | 0.000000   |
+  | init                          | 0.000003 | 0.000000 | 0.000000   |
+  | System lock                   | 0.000006 | 0.000000 | 0.000000   |
+  | optimizing                    | 0.000003 | 0.000000 | 0.000000   |
+  | statistics                    | 0.000011 | 0.000000 | 0.000000   |
+  | preparing                     | 0.000013 | 0.000000 | 0.000000   |
+  | executing                     | 0.000043 | 0.000000 | 0.000000   |
+  | end                           | 0.000002 | 0.000000 | 0.000000   |
+  | query end                     | 0.000002 | 0.000000 | 0.000000   |
+  | waiting for handler commit    | 0.000005 | 0.000000 | 0.000000   |
+  | closing tables                | 0.000005 | 0.000000 | 0.000000   |
+  | freeing items                 | 0.000054 | 0.000000 | 0.000000   |
+  | cleaning up                   | 0.000007 | 0.000000 | 0.000000   |
+
+### explain执行计划
+
+通过explain/desc命令获取MySQL如何执行SELECT语句的信息，包括在SELECT语句执行过程中表如何连接和连接的顺序。
+
+```sql
+explain select columns_name from table_name where condition
+```
+
+- id
+  select查询的序列号，表示查询中执行select子句或者是操作表的顺序（id相同，执行顺序从上到下；id不同，值越大越先执行）
+- select_type
+  表示select的类型，常见的取值有SIMPLE（简单表，即不使用表连接或者子查询）、PRIMARY（主查询，即外层的查询）、UNION（UNION中的第二个或者后面的查询语句）、SUBQUERY（select/where之后包含了子查询）等
+- type
+  表示连接类型，性能由好到差的连接类型为NULL（一般业务查询不可能优化到null，例如`select 'A'`）、system（一般是访问系统表）、const（一般根据主键或唯一索引访问）、eq_ref、ref（一般使用非唯一索引访问）、range、index、all（全表扫描）。
+- possible_key
+  显示可能应用在这张表上的索引，一个或多个
+- Key
+  实际使用的索引，如果为NULL，则没有使用索引
+- Key_len
+  表示索引中使用的字节数，该值为索引字段最大可能长度，并非实际使用长度，在不损失精确性的前提下，长度越短越好
+- rows
+  MySQL认为必须要执行查询的行数，在InnoDB引擎的表中，是一个估计值，可能并不总是精确的
+- filtered
+  表示返回结果的行数占需读取行数的百分比，越大越好
+- Extra
+  额外信息
 
 ## 插入数据
 
@@ -43,14 +206,18 @@
 页可以为空，也可以填充一半，也可以填满。每个页包含了2-N行数据，根据主键排列。
 
 <img :src="$withBase='/img/sql-pk-1.png'" class="align-center" />
+![](../.vuepress/public/img/sql-pk-1.png) 
 
 <img :src="$withBase='/img/sql-pk-2.png'" class="align-center" />
+![](../.vuepress/public/img/sql-pk-2.png) 
 
 一般是50%的位置
 
 <img :src="$withBase='/img/sql-pk-3.png'" class="align-center" />
+![](../.vuepress/public/img/sql-pk-3.png) 
 
 <img :src="$withBase='/img/sql-pk-4.png'" class="align-center" />
+![](../.vuepress/public/img/sql-pk-4.png) 
 
 ### 页合并
 
@@ -61,12 +228,16 @@
 > MERGE_THRESHOLD: 合并页的阈值，可以自己设置，在创建表或者创建索引时指定
 
 <img :src="$withBase='/img/sql-pk-merge-1.png'" class="align-center" />
+![](../.vuepress/public/img/sql-pk-merge-1.png) 
 
 <img :src="$withBase='/img/sql-pk-merge-2.png'" class="align-center" />
+![](../.vuepress/public/img/sql-pk-merge-2.png) 
 
 <img :src="$withBase='/img/sql-pk-merge-3.png'" class="align-center" />
+![](../.vuepress/public/img/sql-pk-merge-3.png) 
 
 <img :src="$withBase='/img/sql-pk-merge-4.png'" class="align-center" />
+![](../.vuepress/public/img/sql-pk-merge-4.png) 
 
 ### 主键设计原则
 
@@ -83,7 +254,7 @@
 
 ### order by设计原则
 
-1. 根据排序字段建立合适的索引，所字段排序时，也遵循最左前缀法则
+1. 根据排序字段建立合适的索引，索引字段排序时，也遵循最左前缀法则
 
 2. 尽量使用覆盖索引
 
@@ -104,7 +275,7 @@
 当数据总量比较大时，页数越大查询越慢，此时可以通过**覆盖索引 + 子查询**的方式来优化
 
 ```sql
-select s.* from tb_sku a, (select id from tb_sku order by id limit 2000000,10) b where a.id = b.id;
+select a.* from tb_sku a, (select id from tb_sku order by id limit 2000000,10) b where a.id = b.id;
 ```
 
 
@@ -126,7 +297,7 @@ select s.* from tb_sku a, (select id from tb_sku order by id limit 2000000,10) b
    - 没有not null约束，InnoDB引擎会遍历整张表把每一行的字段取出来，返回给服务层，服务层判断是否为null，不为null，计数累加
    - 有not null约束，InnoDB引擎会遍历整张表把每一行字段值取出来，返回给服务层，直接按行进行累加
 3. count(1)
-   InnoDB引擎遍历整张表，但不取值。服务层对于返回的没一行，放一个数字1进去，直接按行进行累加
+   InnoDB引擎遍历整张表，但不取值。服务层对于返回的每一行，放一个数字1进去，直接按行进行累加
 4. count(*)
    InnoDB引擎并不会把全部字段取出来，而是专门做了优化，不取值，服务层直接按行进行累加
 
@@ -135,3 +306,7 @@ select s.* from tb_sku a, (select id from tb_sku order by id limit 2000000,10) b
 ## update优化
 
 InnoDB的行锁是针对索引加的锁，不是针对记录加的锁，所以更新时一定要以索引为条件进行更新，否则会升级为表锁。并且更新时索引不能失效，否则也会升级为表锁。
+
+## 设计思路
+
+1. 表主键（id）可以采用数值类型，因为数值类型在数据库中占用存储空间更小

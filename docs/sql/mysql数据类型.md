@@ -112,5 +112,3 @@ MySQL支持许多包含各种几何和地理值的空间数据类型，如下表
 
 MySQL `5.7.8`版本支持原生[JSON](http://www.yiibai.com/mysql/json.html)数据类型，可以更有效地存储和管理JSON文档。 本机JSON数据类型提供JSON文档的自动验证和最佳存储格式。
 
-//原文出自【易百教程】，商业转载请联系作者获得授权，非商业转载请保留原文链接：https://www.yiibai.com/mysql/data-types.html 
-

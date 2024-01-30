@@ -37,7 +37,7 @@
 
 ## 基本语法
 
-### SQL执行顺序
+### [SQL执行顺序](https://zhuanlan.zhihu.com/p/662951708)
 
 ```sql
 (8) SELECT 
@@ -54,7 +54,8 @@
 ```
 
 1. `from`子句是执行的第一步，根据语句后的表进行查询，生成一个虚拟表作为数据源，如果`from`后跟了多个表，则进行笛卡尔积，执行顺序是从后往前，即最后的表作为基础表
-2. 关于`on`与`join`的顺序存在疑虑，因为`on`一般情况下是设置的进行联结的多张表之间的关系，所以是否是先`join`在进行`on`？？
+1. `on`子句在`from`子句之后执行，对`from`子句产生的虚拟表进行过滤，并产生一张新的虚拟表
+1. `join`子句在`on`子句之后执行，为`on`子句产生的虚拟表添加外部行，也就是联结表的数据，此时，会将`on`子句过滤掉的属于**保留表**的行重新添加回来。
 
 ### 创建表
 
@@ -510,7 +511,8 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
   +--------------+
   ```
 
--  <img :src="$withBase='/img/regexp1.jpg'" class="align-center" />
+- <img :src="$withBase='/img/regexp1.jpg'" class="align-center" />
+  ![](../.vuepress/public/img/regexp1.jpg) 
 
   ```sql
   select prod_name from products where prod_name regexp '[:digit:] Ton' order by prod_name;
@@ -524,6 +526,7 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
   ```
 
 - <img :src="$withBase='/img/regexp2.jpg'" class="align-center" />
+  ![](../.vuepress/public/img/regexp2.jpg) 
 
   ```sql
   select prod_name from products where prod_name regexp '\\([0-9] sticks?\\)' order by prod_name;
@@ -536,6 +539,7 @@ select prod_name,prod_price from products where vend_id not in (1002,1003) order
   ```
 
 - <img :src="$withBase='/img/regexp3.jpg'" class="align-center" />
+  ![](../.vuepress/public/img/regexp3.jpg) 
 
   ```sql
   select prod_name from products where prod_name regexp '^[[:digit:]\\.]';
@@ -585,9 +589,11 @@ select vend_id,count(*) num_prods from products group by vend_id;
 
 6. `with rollup` 对分组后的数据每一组进行汇总并返回。此函数是对聚合函数进行求和，注意 `with rollup`是对 group by 后的第一个字段，进行分组求和。
    <img :src="$withBase='/img/with_rollup.PNG'" class="align-center" />
+   ![](../.vuepress/public/img/with_rollup.PNG) 
 
 上图左侧部分箭头所指右侧部分的数据是对应的，右侧部分方框中的数据是对上面该组数据的汇总，由于没有使用聚合函数，所以用NULL表示，最后一个是对所测所有查询结果的汇总。
 <img :src="$withBase='/img/with_rollup_2.jpeg'" class="align-center" />
+![](../.vuepress/public/img/with_rollup_2.jpeg) 
 
 有时 `group by` 关闭了ONLY_FULL_GROUP_BY模式后可以不要求检索列必须在分组中，这时，查询出来的不在分组中的其他需要被检索出来的列默认选择第一行。
 
@@ -601,6 +607,7 @@ select vend_id, count(*) as num from products where prod_price  >= 10 group by v
 
 与 `order by` 区别
 <img :src="$withBase='/img/group_by&order_by.jpg'" class="align-center" />
+![](../.vuepress/public/img/group_by&order_by.jpg) 
 
 ```sql
 select sum(quantity*item_price) as ordertotal,order_num from orderitems group by order_num having sum(quantity*item_price) >= 50 order by ordertotal;
@@ -722,7 +729,7 @@ select vend_name,upper(vend_name) as vend_name_upper from vendors order by vend_
 select vend_name,length(vend_name) as vend_name_upper from vendors order by vend_name;
 ```
 
-####  `locata(substr,str)` `locate(substr,str,pos)` 
+####  `locate(substr,str)` `locate(substr,str,pos)` 
 
 返回 `substr` 子串在 `str` 中首次出现的位置（首位为1）， `pos` 表示从第几位开始查。
 
@@ -741,9 +748,9 @@ select locate('bar','foobarbar',5);
 +-----------------------------+
 ```
 
-####  `substring()` 
+####  `substring()/substr()` 
 
-- `substring(str,pos)`  `substring(str from pos)` 从位置 `pos` 开始截取
+- `substring(str,pos)`  `substring(str from pos)` 从位置 `pos` 开始截取，开始位置为1。
 
   ```sql
    select substring('Quadratically',5);
@@ -753,7 +760,7 @@ select locate('bar','foobarbar',5);
   +-----------------------------------+
   ```
 
-- `substring(str,pos,len)`  `substring(str from pos for len)` 从位置 `pos` 开始截取长度为 `len` 的字符串
+- `substring(str,pos,len)`  `substring(str from pos for len)` 从位置 `pos` 开始截取长度为 `len` 的字符串，开始位置为1。
 
   ```sql
   select substring('Quadratically',5,3);
@@ -782,6 +789,7 @@ select cust_name,cust_contact from customers where soundex(cust_contact) = sound
 
 格式： `yyyy-mm-dd` 
 <img :src="$withBase='/img/date1.jpg'" class="align-center" />
+![](../.vuepress/public/img/date1.jpg) 
 
 查询日期位2005年9月1日的订单
 
@@ -834,6 +842,7 @@ select cust_id,order_num from orders where year(order_date) = '2005' and month(o
 ### 数值处理函数
 
 <img :src="$withBase='/img/num1.jpg'" class="align-center" />
+![](../.vuepress/public/img/num1.jpg) 
 
 ### 聚集函数
 
@@ -1075,6 +1084,8 @@ select vend_name,prod_name,prod_price from vendors inner join products on vendor
 
 ```sql
 select prod_id,prod_name from products where vend_id in (select vend_id from products where prod_id = 'DTNTR'); # 使用子查询
+
+
 select p1.prod_id ,p1.prod_name from products p1,products p2 where p1.vend_id = p2.vend_id and p2.prod_id = 'DTNTR'; # 使用自联结
 +---------+----------------+
 | prod_id | prod_name      |
@@ -1257,6 +1268,7 @@ select note_text from productnotes where match(note_text) against('heavy -rope*'
 ```
 
 <img :src="$withBase='/img/布尔文本搜索.jpg'" class="align-center" />
+![](../.vuepress/public/img/布尔文本搜索.jpg)
 
 #### 注意：
 
@@ -1477,7 +1489,7 @@ show procedure status like 'ordertotal'; # 进行过滤
 
 ## 游标（cursor）
 
-是一个存储在 `MySQL` 服务器上的数据库查询，它不是一条 `select` 语句，而是被该语句检索出来的结果集。主要用于交互式应用，其中用户需要滚动屏幕上的数据，并对数据进行浏览或做出更改。在 `MySQL` 中只能用于存储过程（和函数）。先声明（declare）然后打开（open）最后关闭（close），声明之后可以多次打开或者关闭。
+是一个存储在 `MySQL` 服务器上的数据库查询，它不是一条 `select` 语句，而是被该语句检索出来的**结果集**。主要用于交互式应用，其中用户需要滚动屏幕上的数据，并对数据进行浏览或做出更改。在 `MySQL` 中只能用于存储过程（和函数）。先声明（declare）然后打开（open）最后关闭（close），声明之后可以多次打开或者关闭。
 
 ### 为什么使用游标：
 

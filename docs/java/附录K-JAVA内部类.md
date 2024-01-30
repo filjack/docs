@@ -2,27 +2,27 @@
 
 定义在类中的类。内部类对象**总有一个隐式引用**（所以外部类的静态方法无法调用成员内部类，因为静态方法没有隐式的引用传递），指向了创建它（实例化该内部类）的外部类对象实例，这样它就可以访问该对象的域等信息；但是[静态内部类](#静态内部类)没有。 
 
-### 为什么使用内部类
+## 为什么使用内部类
 
-#### 命名控制
+### 命名控制
 
 内部类的命名在编译器中会带有外部类的名称，这种以 $ 符号分隔重新生成类名的行为是由编译器完成的，虚拟机对此一无所知。
 
 `e.g.` `TalkClock$TimerPrint` 其中`TalkClock`是外部类
 
-#### 访问控制
+### 访问控制
 
 - 内部类方法可以访问该类**定义所在的作用域**中的数据，包括私有数据（如果是在类中，那么该内部类可以访问外部类的相关信息；如果声明在方法中，那么该内部类除了访问外部类的相关信息，还可以访问该方法内的信息，此时该内部类称为[局部内部类](#局部内部类)）
 - 内部类可以对同一个包中的其他类隐藏起来，这样可以将内部类的数据域设计为public，它仍然是安全的，只能被外部类中的方法访问。**在JAVA中，只有内部类可以实现这样的控制。** 
 - 当想要定义一个回调函数且不想编写大量代码时，使用[匿名（anonymous）内部类](#匿名内部类)比较便捷
 
-#### 隐式引用
+### 隐式引用
 
 内部类对象总有一个隐式引用，指向了创建它（实例化该内部类）的外部类对象实例，这样它就可以访问该对象的全部状态信息；但是[静态内部类](#静态内部类)没有。
 
-该引用在内部类构造器中设置。编译器修改了所有内部类的构造器，添加一个外部类引用的参数。（由于这个隐式参数，内部类失去了无参构造器，即使认为添加一个无参构造器也不会生效）通过下面class文件代码可以观察到编译器的做法：
+该引用在内部类构造器中设置。编译器修改了所有内部类的构造器，添加一个外部类引用的参数。（**由于这个隐式参数，内部类失去了无参构造器，即使人为添加一个无参构造器也不会生效**,）通过下面class文件代码可以观察到编译器的做法：
 
-##### 外围类class文件：
+#### 外围类class文件：
 
 ```java
 // TalkClock.class 外部类
@@ -66,7 +66,7 @@ class TalkClock {
 
 ```
 
-##### 外围类反编译后代码：
+#### 外围类反编译后代码：
 
 ```java
 // javap timer.TalkClock
@@ -80,7 +80,7 @@ class timer.TalkClock {
 
 注意 `static boolean access$000(timer.TalkClock);` 方法，内部类通过该方法获取外围类的信息[^1]。
 
-##### 内部类class文件：
+#### 内部类class文件：
 
 ```java
 // TimerPrint.class 内部类
@@ -99,11 +99,11 @@ public class TalkClock$TimerPrint implements ActionListener {
 }
 ```
 
-##### 内部类反编译后代码
+#### 内部类反编译后代码
 
-```
+```java
 // javap 'timer.TalkClock$TimerPrint' 注意引号括起来，不然会只截取到$符号前面的
-Compiled from "InnerClassTest.java"
+// Compiled from "InnerClassTest.java"
 public class timer.TalkClock$TimerPrint implements java.awt.event.ActionListener {
   final timer.TalkClock this$0;
   public timer.TalkClock$TimerPrint(timer.TalkClock);
@@ -114,7 +114,7 @@ public class timer.TalkClock$TimerPrint implements java.awt.event.ActionListener
 
 
 
-### 一个简单的内部类
+## 一个简单的内部类
 
 ```java
 package timer;
@@ -178,7 +178,7 @@ class TalkClock {
 
 
 
-### 语法规则
+## 语法规则
 
 - 内部类对于外围类中声明的域的引用，可以显示的写为 `outerClass.this.field` 
 
@@ -205,8 +205,11 @@ class TalkClock {
 - 在外围类的作用域之外引用内部类可以写为 `OuterClass.InnerClass` (此时内部类的访问权限不能是私有的)
 
   ```java
+  // TimerPrinter不是静态内部类时
   TalkingClock jabberer = new TalkingClock(1000, true);
   TalkingClock.TimerPrinter listener = jabberer.new TimerPrinter();
+  // TimerPrinter是静态内部类时
+  TalkingClock.TimerPrinter listener = new TalkingClock.TimerPrinter();
   ```
 
 - 内部类（普通、局部、匿名内部类）中不允许声明静态域，但是可以有静态常量（即 `public static final`修饰），因为一个静态域要求只有一个实例，但是每个外围类对象都有一个单独的内部类实例，如果此时内部类中的静态域不是final的，那么它就可能不是唯一。
@@ -219,7 +222,7 @@ class TalkClock {
 
 - 声明在接口中的内部类自动成为`public static` 
 
-### 局部内部类
+## 局部内部类
 
 当某个内部类只有在某个特定的外围类方法中使用实例化使用时，可以将内部类声明为局部内部类，位于该外围类方法中。
 
@@ -290,7 +293,7 @@ class TalkClock$1TimerPrint implements ActionListener {
 
 
 
-### 匿名内部类
+## 匿名内部类
 
 将局部内部类更进一步简化，只创建该类的一个对象，这样就不必声明该类，这种类被称为匿名内部类。
 
@@ -312,7 +315,7 @@ class TalkClock$1TimerPrint implements ActionListener {
 
 对于引用外围类的域，或方法的局部变量，匿名内部类的要求与[局部内部类](#局部内部类)相同。由于构造器名与类名相同，匿名内部类代码体中无法拥有构造器，所传构造器参数会传递到超类的构造器中；当匿名内部类是实现一个接口的时候，不能有任何构造器参数。
 
-#### 双括号初始化
+### 双括号初始化
 
 ```java
 ArrayList<String> friends = new ArrayList<>();
@@ -334,9 +337,9 @@ invite(new ArrayList<String>() {
 
 这里，第一个大括号标识一个匿名类，第二个大括号则是一个对象构造块。
 
-#### equals方法
+### equals方法
 
-#### 在静态方法中获取所属类的类名
+### 在静态方法中获取所属类的类名
 
 在普通方法中可以通过 `this.getClass()` 来获取，但是静态方法没有this，所以需要通过以下方式获取
 
@@ -346,7 +349,7 @@ new Object(){}.getClass().getEnclosingClass()
 
 `new Object(){}` 会建立Object的一个匿名类的匿名对象，`getEnclosingClass()` 获取其外围类。
 
-### 静态内部类（嵌套类）
+## 静态内部类（嵌套类）
 
 当使用内部类只是为了将一个类隐藏到另一个类的内部，并且不需要内部类引用外围类对象，此时可以使用静态内部类。
 

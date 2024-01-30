@@ -20,6 +20,7 @@ create user ben identified by 'p@$$w0rd'; # 创建用户,这样创建的用户�
 在数据库中创建一个用户 testuser@% 是无法在本地登录的。其原因就在于mysql库的user表中有如下的数据：
 
 <img :src="$withBase='/img/SQL.jpg'" class="align-center" /> 
+![](../.vuepress/public/img/SQL.jpg) 
 
    登录的时候先会去比对host再比对user再验证密码。
 
@@ -110,8 +111,9 @@ revoke select on crashcourse.* from ben@localhost; # 删除ben在crashcourse中�
 - 特定的存储过程
 
 <img :src="$withBase='/img/权限分配.jpg'" class="align-center" />
+![](../.vuepress/public/img/权限分配.jpg)
 
-​	**授权时，用户账号必须存在，但是涉及到的对象（对哪些数据拥有权限）可以不存在。所以，在数据库或者表被删除后，权限依然存在，当重建后，权限依旧存在。** 
+​	**授权时，用户账号必须存在，但是涉及到的对象（对哪些数据拥有权限）可以不存在。所以，在数据库或者表被删除后，权限依然存在，当重建后，权限依旧存在。**  
 
 
 

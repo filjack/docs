@@ -26,7 +26,7 @@
 - `BEFORE DELETE` - 在从表中删除数据之前激活触发器。
 - `AFTER DELETE` - 从表中删除数据之后激活触发器。
 
-但是，从*`MySQL 5.7.2+`*版本开始，可以[为相同的触发事件和动作时间定义多个触发器](http://www.yiibai.com/mysql/triggers-create-multiple-triggers-for-the-same-trigger-event-and-action-time.html)。
+但是，从*`MySQL 5.7.2+`*版本开始，可以为相同的触发事件和动作时间定义多个触发器。
 
 ## `MySQL`触发存储
 
@@ -56,7 +56,7 @@ CREATE TRIGGER trigger_name trigger_time trigger_event
  END;
 ```
 
-- 将触发器名称放在`CREATE TRIGGER`语句之后。触发器名称应遵循命名约定`[trigger time]_[table name]_[trigger event]`，例如before_employees_update。
+- 将触发器名称放在`CREATE TRIGGER`语句之后。触发器名称应遵循命名约定`[trigger_time]_[table_name]_[trigger_event]`，例如before_employees_update。
 - 触发激活时间可以在之前或之后。必须指定定义触发器的激活时间。如果要在更改之前处理操作，则使用`BEFORE`关键字，如果在更改后需要处理操作，则使用`AFTER`关键字。
 - 触发事件可以是`INSERT`，`UPDATE`或`DELETE`。此事件导致触发器被调用。 触发器只能由一个事件调用。要定义由多个事件调用的触发器，必须定义多个触发器，每个事件一个触发器。
 - 触发器必须与特定表关联。没有表触发器将不存在，所以必须在`ON`关键字之后指定表名。
@@ -142,7 +142,7 @@ DROP TRIGGER table_name.trigger_name;
 
 ## 注意
 
-- 当使用不使用`INSERT`，`DELETE`或`UPDATE`语句更改表中数据的语句时，不会调用与表关联的触发器。 例如，[TRUNCATE](http://www.yiibai.com/mysql/truncate-table.html)语句删除表的所有数据，但不调用与该表相关联的触发器。
+- 当使用不是`INSERT`，`DELETE`或`UPDATE`语句更改表中数据的语句时，不会调用与表关联的触发器。 例如，[TRUNCATE](http://www.yiibai.com/mysql/truncate-table.html)语句删除表的所有数据，但不调用与该表相关联的触发器。
 - 有些语句使用了后台的`INSERT`语句，如[REPLACE语句](http://www.yiibai.com/mysql/replace.html)或[LOAD DATA语句](http://www.yiibai.com/mysql/import-csv-file-mysql-table.html)。如果使用这些语句，则调用与表关联的相应触发器。
 - 触发器仅支持在表上建立，视图以及临时表都不支持。
-- 如果 `before` 触发器失败，则 `sql` 不回执行，如果 `before` 触发器或者是 `sql` 本身失败，则 `after` 触发器不回执行。
+- 如果 `before` 触发器失败，则 `sql` 不会执行，如果 `before` 触发器或者是 `sql` 本身失败，则 `after` 触发器不回执行。
