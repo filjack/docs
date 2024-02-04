@@ -293,7 +293,7 @@ mvn dependency:tree
 
 #### compile
 
-通常使用的第三方框架的 jar 包这样在项目实际运行时真正要用到的 jar 包都是以 compile 范围进行依赖的。比如 SSM 框架所需jar包。
+通常使用的第三方框架的 jar 包等在项目实际运行时真正要用到的 jar 包都是以 compile 范围进行依赖的。比如 SSM 框架所需jar包。
 
 #### test
 

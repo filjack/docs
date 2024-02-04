@@ -951,6 +951,10 @@ from products;
 
 如果expr的值为val1，则返回res1，否则返回default，可以有多个`when...then...`语句
 
+#### `coalesce(value,...)`
+
+返回值列表中第一个非null的值，如果都为null，则返回null
+
 ## 约束
 
 作用于表上字段的规则，用于限制存储在表中的数据，期望保证数据的正确性、有效性、完整性。
@@ -1172,7 +1176,7 @@ select prod_id,prod_name,prod_price from products where vend_id in (1001,1002) u
 
 #### 排序
 
-只能在最后一条查询语句之后使用 `order by` ，该排序对整个组合查询生效。无法单独只排列某一个。
+**只能在最后一条查询语句之后使用 `order by`** ，该排序对整个组合查询生效。无法单独只排列某一个。
 
 ### 全文本搜索
 
